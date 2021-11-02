@@ -1,0 +1,42 @@
+{
+    "config": {
+        "canvas": {
+            "width": 300,
+            "height": 250
+        },
+        "network": {
+            "tickMs": 50,
+            "minLatency": 10,
+            "maxLatency": 30
+        },
+        "players": [
+            {
+                "id": 1,
+                "color": "#483D8B",
+                "x": 10,
+                "y": 10,
+                "size": 20,
+                "keyUp": 87,
+                "keyDown": 83,
+                "keyLeft": 65,
+                "keyRight": 68
+            },
+            {
+                "id": 2,
+                "color": "#6B8E23",
+                "x": 270,
+                "y": 220,
+                "size": 20,
+                "keyUp": 38,
+                "keyDown": 40,
+                "keyLeft": 37,
+                "keyRight": 39
+            }
+        ],
+        "physics": {
+            "worldScale": 30,
+            "strength": 10,
+            "borderThickness": 5
+        }
+    }
+}

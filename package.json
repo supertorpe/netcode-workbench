@@ -1,0 +1,32 @@
+{
+  "name": "netcode-workbench",
+  "version": "0.0.1",
+  "description": "Workbench to test and analyze the behavior of different netcode algorithms",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "repository": "github:supertorpe/netcode-workbench/",
+  "author": "supertorpe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/supertorpe/netcode-workbench/issues"
+  },
+  "homepage": "https://supertorpe.github.io/netcode-workbench/",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
+    "angular": "^1.8.2",
+    "jspanel4": "^4.12.0",
+    "mini.css": "^3.0.1",
+    "planck-js": "^0.3.31",
+    "streamsaver": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/angular": "^1.8.3",
+    "@types/streamsaver": "^2.0.1",
+    "@vitejs/plugin-legacy": "^1.6.2",
+    "typescript": "^4.4.4",
+    "vite": "^2.6.12"
+  }
+}

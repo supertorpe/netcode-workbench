@@ -1,0 +1,73 @@
+/** {
+  margin: 0;
+  padding: 0;
+}*/
+
+html,
+body,
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.gameArea {
+  width: 300px;
+  height: 250px;
+  border: 1px solid;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: calc((100% - 300px) / 2);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.logs {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8em;
+  white-space:nowrap;
+  margin: 0;
+}
+.log_info {
+  color: black;
+}
+
+.log_warn {
+  color: darkgoldenrod;
+}
+
+.log_error {
+  color: brown;
+}
+
+.center-text {
+  text-align: center;
+}
+.input-small {
+  width: 6em;
+}
+.small-text {
+  font-size: 0.9em;
+}
+/*
+.main {
+  height: 80vh;
+}
+
+.player {
+  border: 1px solid;
+}
+
+.gamestates {
+  border: 1px solid;
+}
+
+.gamearea {
+  border: 1px solid;
+}
+
+.footer {
+  height: 20vh;
+  border: 1px solid;
+}
+*/
