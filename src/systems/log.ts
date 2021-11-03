@@ -1,17 +1,17 @@
-import { currentTimestamp } from "../utils";
+import { currentTimestamp } from '../utils';
 
 export enum LogLevel {
-    INFO = "INFO",
-    WARN = "WARN",
-    ERROR = "ERROR"
+    INFO = 'INFO',
+    WARN = 'WARN',
+    ERROR = 'ERROR'
 }
 
 export class Trace {
     constructor(public level: LogLevel, public timestamp: number, public text: string) { }
-    public toString() : string {
+    public toString(): string {
         const date = new Date();
         date.setTime(this.timestamp);
-        return `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}:${date.getSeconds().toString().padStart(2,'0')}.${date.getMilliseconds().toString().padStart(3,'0')} ${this.level.padEnd(5)} ${this.text}`;
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}.${date.getMilliseconds().toString().padStart(3, '0')} ${this.level.padEnd(5)} ${this.text}`;
     }
 }
 

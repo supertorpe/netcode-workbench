@@ -10,7 +10,7 @@ export class PlayerConfig {
     constructor(
         public id: number, public color: string,
         public x: number, public y: number, public size: number,
-        public keyUp: number, public keyDown: number, public keyLeft: number, public keyRight: number, ) { }
+        public keyUp: number, public keyDown: number, public keyLeft: number, public keyRight: number,) { }
 }
 export class PhysicsConfig {
     constructor(public worldScale: number, public strength: number, public borderThickness: number) { }
@@ -21,7 +21,7 @@ export class Config {
         public network: NetworkConfig,
         public players: PlayerConfig[],
         public physics: PhysicsConfig
-      ) {}
+    ) { }
 }
 
 export const config: Config = (<any>configJson).config;

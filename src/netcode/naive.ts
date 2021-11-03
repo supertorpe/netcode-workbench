@@ -1,5 +1,5 @@
-import { Command, GameState, GameStateLog } from "../model";
-import { BaseNetCode } from "./base-netcode";
+import { Command, GameState, GameStateLog } from '../model';
+import { BaseNetCode } from './base-netcode';
 
 /*
   'naive' algorithm:
@@ -32,7 +32,7 @@ export class NaiveAlg extends BaseNetCode {
       const remoteCommandsCount = this.remoteCommands.length;
       for (let index = 0; index < remoteCommandsCount; index++) {
         let command = this.remoteCommands[index];
-        if (command.tick === this._initialGameState.tick) {
+        if (command && command.tick === this._initialGameState.tick) {
           this._initialGameState.commands.push(command);
           this.remoteCommands.splice(index - removed++, 1);
         }
@@ -74,6 +74,5 @@ export class NaiveAlg extends BaseNetCode {
   public getGameStateToRender(): GameState {
     return this._initialGameState;
   }
-
 
 }

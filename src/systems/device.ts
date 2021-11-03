@@ -25,7 +25,7 @@ export class Device implements GameStateMachine {
 
     private running = false;
     private _log: Log;
-    private _gameStateHistory : GameStateLog[];
+    private _gameStateHistory: GameStateLog[];
     private _networkConn: NetworkConn;
     private _canvas: HTMLCanvasElement;
     private _context: CanvasRenderingContext2D | null;
@@ -186,7 +186,7 @@ export class Device implements GameStateMachine {
                     body.getPosition().x * config.physics.worldScale - width / 2,
                     body.getPosition().y * config.physics.worldScale - height / 2,
                     width, height);
-            
+
             } else {
                 let player: PlayerConfig = <any>body.getUserData();
                 context.fillStyle = player.color;
@@ -202,7 +202,7 @@ export class Device implements GameStateMachine {
         // apply commands to players
         for (let command of gameState.commands) {
             if (!command || command.value === CONSTS.COMMAND_NONE) continue;
-            const body = gameState.bodies.find(body => (body.getUserData() ? (<PlayerConfig>body.getUserData()).id : -1 ) == command.playerId);
+            const body = gameState.bodies.find(body => (body.getUserData() ? (<PlayerConfig>body.getUserData()).id : -1) == command.playerId);
             if (body) {
                 const forceX = (command.value == CONSTS.COMMAND_RIGHT || command.value == CONSTS.COMMAND_DOWN_RIGHT || command.value == CONSTS.COMMAND_UP_RIGHT
                     ? config.physics.strength

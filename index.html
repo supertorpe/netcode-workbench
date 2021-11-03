@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" data-ng-app="app">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netcode Workbench</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         [ng\:cloak],
         [ng-cloak],
@@ -18,35 +18,10 @@
         }
     </style>
 </head>
-
 <body class="ng-cloak" data-ng-controller="mainCtrl">
-    <!--
-<input type="checkbox" id="modal-control1" class="modal">
-<div>
-  <div class="card">
-    <label for="modal-control1" class="modal-close"></label>
-    <h3 class="section">Modal 1</h3>
-    <p class="section">This is a modal dialog! 1</p>
-  </div>
-</div>
-
-<input type="checkbox" id="modal-control2" class="modal">
-<div>
-  <div class="card">
-    <label for="modal-control2" class="modal-close"></label>
-    <h3 class="section">Modal 2</h3>
-    <p class="section">This is a modal dialog! 2</p>
-  </div>
-</div>
--->
     <div id="controlPanel">
         <div class="row">
-
             <div class="col-sm">
-                <!--
-                <label for="modal-control1">Show modal 1</label>
-                <label for="modal-control2">Show modal 2</label>
-                -->
                 <div class="row">
                     <div class="col">
                         <label for="selAlgorithm">Algorithm</label>
@@ -70,7 +45,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-sm">
                 <div class="button-group">
                     <button data-ng-click="backward()" data-ng-if="info.btnBackwardEnabled"><i
@@ -96,7 +70,6 @@
             </div>
         </div>
     </div>
-
     <div id="player1GameStates">
         <div class="card" data-ng-repeat="item in info.gamestatesPlayer1">
             <div class="section">Tick: {{::item.tick}}</div>
@@ -110,18 +83,15 @@
             </div>
         </div>
     </div>
-
     <div id="player1Canvas">
         <div class="center-text">Control keys: W S A D</div>
         <canvas id="player1GameArea" class="gameArea" width="300px" height="250px"></canvas>
     </div>
-
     <div id="player1Logs">
         <p data-ng-repeat="trace in info.logsPlayer1" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
-
     <div id="player2GameStates">
         <div class="card" data-ng-repeat="item in info.gamestatesPlayer2">
             <div class="section">Tick: {{::item.tick}}</div>
@@ -135,20 +105,16 @@
             </div>
         </div>
     </div>
-
     <div id="player2Canvas">
         <div class="center-text">Control keys: <i class="fas fa-arrow-up"></i> <i class="fas fa-arrow-down"></i> <i
                 class="fas fa-arrow-left"></i> <i class="fas fa-arrow-right"></i></div>
         <canvas id="player2GameArea" class="gameArea" width="300px" height="250px"></canvas>
     </div>
-
     <div id="player2Logs">
         <p data-ng-repeat="trace in info.logsPlayer2" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
-
     <script type="module" src="/src/main.ts"></script>
 </body>
-
 </html>

@@ -27,13 +27,13 @@ class Gui {
             config.players[0].keyLeft,
             config.players[0].keyRight,
             document.getElementById('player1GameArea') as HTMLCanvasElement);
-            this.devicePlayer2 = new Device(
-                config.players[1].id,
-                config.players[1].keyUp,
-                config.players[1].keyDown,
-                config.players[1].keyLeft,
-                config.players[1].keyRight,
-                document.getElementById('player2GameArea') as HTMLCanvasElement);
+        this.devicePlayer2 = new Device(
+            config.players[1].id,
+            config.players[1].keyUp,
+            config.players[1].keyDown,
+            config.players[1].keyLeft,
+            config.players[1].keyRight,
+            document.getElementById('player2GameArea') as HTMLCanvasElement);
     }
 
     public build() {
@@ -238,7 +238,7 @@ class Gui {
                 };
                 $scope.saveAll = () => {
                     const date = new Date();
-                    
+
                     const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}.log`);
                     const writer = fileStream.getWriter();
                     const encoder = new TextEncoder();
@@ -263,7 +263,7 @@ ${this.devicePlayer2.log}`;
                     writer.write(uint8array);
                     writer.close();
                 };
-                
+
                 $scope.saveGamestates1 = () => {
                     const date = new Date();
                     const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}-p1states.log`);

@@ -1,6 +1,6 @@
-import { Command, GameState, GameStateMachine } from "../model";
-import { Log } from "../systems/log";
-import { currentTimestamp } from "../utils";
+import { Command, GameState, GameStateMachine } from '../model';
+import { Log } from '../systems';
+import { currentTimestamp } from '../utils';
 
 export abstract class BaseNetCode {
 
@@ -29,7 +29,7 @@ export abstract class BaseNetCode {
         return Math.floor((currentTimestamp() - this._startTime) / this._tickMs);
     }
 
-    public abstract localCommandReceived(playerId: number, commandValue: number): Command | undefined ;
+    public abstract localCommandReceived(playerId: number, commandValue: number): Command | undefined;
     public abstract remoteCommandReceived(command: Command): void;
     public abstract getGameStateToRender(): GameState;
     public abstract tick(): void;

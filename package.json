@@ -4,7 +4,7 @@
   "description": "Workbench to test and analyze the behavior of different netcode algorithms",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base=/netcode-workbench/",
     "serve": "vite preview"
   },
   "repository": "github:supertorpe/netcode-workbench/",

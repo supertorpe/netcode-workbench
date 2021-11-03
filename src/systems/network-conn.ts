@@ -1,6 +1,6 @@
-import { Command } from "../model";
-import { EventEmitter } from "./event-emitter";
-import { randomInt } from "../utils";
+import { Command } from '../model';
+import { EventEmitter } from './event-emitter';
+import { randomInt } from '../utils';
 
 export class Message {
     constructor(public playerId: number, public command: Command) { }
