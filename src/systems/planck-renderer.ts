@@ -55,9 +55,10 @@ export class PlanckRenderer extends Renderer {
         if (nextGameStateTime) {
             // we want to render previous game state, so rewind 1 tick in time
             currentTime -= (nextGameStateTime - gameStateTime);
-            if (currentTime > nextGameStateTime) {
-                currentTime = nextGameStateTime;
-            }
+        }
+        // make sure we don't travel to the future
+        if (currentTime > gameStateTime + this.netcode.tickMs) {
+            currentTime = gameStateTime + this.netcode.tickMs;
         }
         
         const interpolationInfo = new InterpolationInfo(
@@ -104,10 +105,12 @@ export class PlanckRenderer extends Renderer {
         let player: PlayerConfig = <any>body.getUserData();
         let x = 0, y = 0;
         let nextBody;
-        if (!interpolationInfo.nextGameState) { // fake interpolation: calc new position from current one, velocity and time elapsed
-            x = this.fakeInterpolate(interpolationInfo.elapsed, body.getPosition().x, body.getLinearVelocity().x);
-            y = this.fakeInterpolate(interpolationInfo.elapsed, body.getPosition().y, body.getLinearVelocity().y);
-        } else { // real interpolation
+        if (!interpolationInfo.nextGameState) {
+            // prediction: calc new position from current one, velocity and time elapsed
+            x = body.getPosition().x + body.getLinearVelocity().x * interpolationInfo.elapsed;
+            y = body.getPosition().y + body.getLinearVelocity().y * interpolationInfo.elapsed;
+        } else {
+            // interpolation
             nextBody = (interpolationInfo.nextGameState as PlanckGameState).bodyFromPlayer((<PlayerConfig>body.getUserData()).id);
             if (nextBody) {
                 const pos0 = body.getPosition();
@@ -179,10 +182,6 @@ export class PlanckRenderer extends Renderer {
         this.context.strokeStyle = player.color;
         this.context.stroke();
         //*/
-    }
-
-    private fakeInterpolate(time: number, pos: number, vel: number): number {
-        return pos + time * vel;
     }
 
 }
