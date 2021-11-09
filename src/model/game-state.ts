@@ -54,6 +54,8 @@ export abstract class GameState {
 
     public abstract toLog(): GameStateLog;
 
+    public abstract clone(): GameState;
+
 }
 
 export interface GameStateMachine {

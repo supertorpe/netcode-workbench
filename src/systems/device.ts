@@ -32,7 +32,7 @@ export class Device implements GameStateMachine {
     private _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     private netcode!: BaseNetCode;
     private renderer!: Renderer;
-    private _interpolation: boolean = false;
+    private _interpolation: boolean = true;
 
     constructor(
         private playerId: number,
@@ -52,9 +52,10 @@ export class Device implements GameStateMachine {
     get log(): Log { return this._log; }
     get deviceUpdatedEmitter(): EventEmitter<void> { return this._deviceUpdatedEmitter; }
     get gameStateHistory(): GameStateLog[] { return this._gameStateHistory; }
-
     get interpolation(): boolean { return this._interpolation; }
     set interpolation(value: boolean) { this._interpolation = value; }
+    get debugBoxes(): boolean { return this.renderer.debugBoxes; }
+    set debugBoxes(value: boolean) { this.renderer.debugBoxes = value; }
 
     public connect(device: Device) {
         this._log.logInfo(`Connected to player ${device.playerId}`);
@@ -67,7 +68,7 @@ export class Device implements GameStateMachine {
         this._networkConn.closeConnections();
     }
 
-    public play(algorithm: string, tickMs: number, minLatency: number, maxLatency: number, interpolation: boolean) {
+    public play(algorithm: string, tickMs: number, minLatency: number, maxLatency: number, interpolation: boolean, debugBoxes: boolean) {
         // network latency
         this._networkConn.minLatency = minLatency;
         this._networkConn.maxLatency = maxLatency;
@@ -83,7 +84,8 @@ export class Device implements GameStateMachine {
         this.netcode.tickMs = tickMs;
         this.netcode.start(initialGameState);
         // initialize renderer
-        this.renderer = new PlanckRenderer(this.canvas, this.netcode);
+        this.renderer = new PlanckRenderer(this.log, this.canvas, this.netcode);
+        this.renderer.debugBoxes = debugBoxes;
         // start gameloop
         this.running = true;
         window.requestAnimationFrame(() => { this.gameLoop(); });
@@ -180,7 +182,6 @@ export class Device implements GameStateMachine {
 
     private draw() {
         this.renderer.render(this._interpolation);
-
     }
 
     public compute(gs: GameState): void {

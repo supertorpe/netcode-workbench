@@ -27,6 +27,7 @@
                         <label for="selAlgorithm">Algorithm</label>
                         <select id="selAlgorithm" data-ng-model="info.algorithm">
                             <option>naive</option>
+                            <option>stibbons</option>
                         </select>
                     </div>
                     <div class="col">
@@ -56,7 +57,10 @@
             <div class="col-sm">
                 <input id="cbInterpolation" type="checkbox" data-ng-model="info.interpolation"
                     data-ng-change="changeInterpolation()" />
-                <label for="cbGameStates">Interpolation</label>
+                <label for="cbGameStates">Interpolation/Prediction</label>
+                <input id="cbDebugBoxes" type="checkbox" data-ng-model="info.debugBoxes"
+                    data-ng-change="changeDebugBoxes()" />
+                <label for="cbDebugBoxes">Debug boxes</label>
                 <legend>Realtime info (hurts performance)</legend>
                 <input id="cbGameStates" type="checkbox" data-ng-model="info.realtimeGameStates"
                     data-ng-change="checkRealtimeInfo()" />

@@ -133,9 +133,10 @@ class Gui {
                     tick: config.network.tickMs,
                     algorithm: 'naive',
                     latency: { min: config.network.minLatency, max: config.network.maxLatency },
-                    realtimeGameStates: true,
-                    realtimeLogs: true,
-                    interpolation: false,
+                    realtimeGameStates: false,
+                    realtimeLogs: false,
+                    interpolation: true,
+                    debugBoxes: true,
                     logsPlayer1: [],
                     logsPlayer2: [],
                     gamestatesPlayer1: [],
@@ -206,8 +207,8 @@ class Gui {
                     this.devicePlayer2.reset();
                     this.devicePlayer1.connect(this.devicePlayer2);
                     this.devicePlayer2.connect(this.devicePlayer1);
-                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation);
-                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation);
+                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation, $scope.info.debugBoxes);
+                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation, $scope.info.debugBoxes);
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
                     $scope.checkRealtimeInfo();
@@ -231,6 +232,10 @@ class Gui {
                 $scope.changeInterpolation = () => {
                     this.devicePlayer1.interpolation = $scope.info.interpolation;
                     this.devicePlayer2.interpolation = $scope.info.interpolation;
+                };
+                $scope.changeDebugBoxes = () => {
+                    this.devicePlayer1.debugBoxes = $scope.info.debugBoxes;
+                    this.devicePlayer2.debugBoxes = $scope.info.debugBoxes;
                 };
                 $scope.saveAll = () => {
                     const date = new Date();
