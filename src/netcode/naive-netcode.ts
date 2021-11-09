@@ -8,14 +8,14 @@ import { BaseNetCode } from './base-netcode';
     - send the command
     - build a new GameState
 */
-export class NaiveAlg extends BaseNetCode {
+export class NaiveNetCode extends BaseNetCode {
 
   private localCommand: Command | undefined;
   private localCommandDumped = false;
   private remoteCommands: Command[] = [];
 
-  public start(initialGameState: GameState): void {
-    super.start(initialGameState);
+  public start(initialGameState: GameState): number {
+    return super.start(initialGameState);
   }
 
   public tick(): GameStateLog | null {
@@ -73,6 +73,11 @@ export class NaiveAlg extends BaseNetCode {
 
   public getGameStateToRender(): GameState {
     return this._initialGameState;
+  }
+
+  public getGameState(tick: number): GameState | null {
+    if (this._initialGameState.tick === tick) return this._initialGameState;
+    else return null;
   }
 
 }

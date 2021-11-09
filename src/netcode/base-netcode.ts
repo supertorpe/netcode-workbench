@@ -19,19 +19,25 @@ export abstract class BaseNetCode {
     set tickMs(value: number) { this._tickMs = value; }
     get currentTick(): number { return this._currentTick; }
 
-    public start(initialGameState: GameState): void {
+    public start(initialGameState: GameState): number {
         this._startTime = currentTimestamp();
         this._currentTick = 0;
         this._initialGameState = initialGameState;
+        return this._startTime;
     }
 
     public tickBasedOnTime(): number {
         return Math.floor((currentTimestamp() - this._startTime) / this._tickMs);
     }
 
+    public tickTime(tick: number): number {
+        return this._startTime + (tick * this.tickMs);
+    }
+
     public abstract localCommandReceived(playerId: number, commandValue: number): Command | undefined;
     public abstract remoteCommandReceived(command: Command): void;
     public abstract getGameStateToRender(): GameState;
+    public abstract getGameState(tick: number): GameState | null;
     public abstract tick(): void;
 
 }

@@ -3,9 +3,11 @@ import { Message, NetworkConn } from './network-conn';
 import { Log } from './log';
 import { EventEmitter } from './event-emitter';
 import { input } from './input';
-import { GameState, GameStateLog, GameStateMachine } from '../model';
+import { PlanckGameState, GameStateLog, GameStateMachine, GameState } from '../model';
 import { BaseNetCode, NetCodeFactory } from '../netcode';
 import * as planck from 'planck-js';
+import { PlanckRenderer } from './planck-renderer';
+import { Renderer } from './renderer';
 
 const CONSTS = {
     COMMAND_NONE: 0,
@@ -27,10 +29,10 @@ export class Device implements GameStateMachine {
     private _log: Log;
     private _gameStateHistory: GameStateLog[];
     private _networkConn: NetworkConn;
-    private _canvas: HTMLCanvasElement;
-    private _context: CanvasRenderingContext2D | null;
     private _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     private netcode!: BaseNetCode;
+    private renderer!: Renderer;
+    private _interpolation: boolean = false;
 
     constructor(
         private playerId: number,
@@ -38,20 +40,21 @@ export class Device implements GameStateMachine {
         private keyDown: number,
         private keyLeft: number,
         private keyRight: number,
-        canvas: HTMLCanvasElement) {
+        private canvas: HTMLCanvasElement) {
         this._log = new Log();
         this._networkConn = new NetworkConn(playerId);
         this._networkConn.commandReceivedEmitter.addEventListener((message) => {
             this.messageReceived(message);
         });
-        this._canvas = canvas;
-        this._context = canvas.getContext('2d');
         this._gameStateHistory = [];
     }
 
     get log(): Log { return this._log; }
     get deviceUpdatedEmitter(): EventEmitter<void> { return this._deviceUpdatedEmitter; }
     get gameStateHistory(): GameStateLog[] { return this._gameStateHistory; }
+
+    get interpolation(): boolean { return this._interpolation; }
+    set interpolation(value: boolean) { this._interpolation = value; }
 
     public connect(device: Device) {
         this._log.logInfo(`Connected to player ${device.playerId}`);
@@ -64,19 +67,23 @@ export class Device implements GameStateMachine {
         this._networkConn.closeConnections();
     }
 
-    public play(algorithm: string, tickMs: number, minLatency: number, maxLatency: number) {
+    public play(algorithm: string, tickMs: number, minLatency: number, maxLatency: number, interpolation: boolean) {
         // network latency
         this._networkConn.minLatency = minLatency;
         this._networkConn.maxLatency = maxLatency;
+        // interpolation
+        this._interpolation = interpolation;
         // initialize physics world
         const world = this.createWorld();
         //  initialize game state
-        const initialGameState = new GameState(0, world);
+        const initialGameState = new PlanckGameState(0, world);
         initialGameState.peerCount = 2;
         // initialize netcode
         this.netcode = NetCodeFactory.build(algorithm, this._log, this);
         this.netcode.tickMs = tickMs;
         this.netcode.start(initialGameState);
+        // initialize renderer
+        this.renderer = new PlanckRenderer(this.canvas, this.netcode);
         // start gameloop
         this.running = true;
         window.requestAnimationFrame(() => { this.gameLoop(); });
@@ -115,13 +122,13 @@ export class Device implements GameStateMachine {
         const world = planck.World(gravity);
         // borders
         // - top
-        this.createStaticBody(world, 0, 0, this._canvas.width, config.physics.borderThickness);
+        this.createStaticBody(world, 0, 0, this.canvas.width, config.physics.borderThickness);
         // - bottom
-        this.createStaticBody(world, 0, this._canvas.height - config.physics.borderThickness, this._canvas.width, config.physics.borderThickness);
+        this.createStaticBody(world, 0, this.canvas.height - config.physics.borderThickness, this.canvas.width, config.physics.borderThickness);
         // - left
-        this.createStaticBody(world, 0, 0, config.physics.borderThickness, this._canvas.height);
+        this.createStaticBody(world, 0, 0, config.physics.borderThickness, this.canvas.height);
         // - right
-        this.createStaticBody(world, this._canvas.width - config.physics.borderThickness, 0, config.physics.borderThickness, this._canvas.height);
+        this.createStaticBody(world, this.canvas.width - config.physics.borderThickness, 0, config.physics.borderThickness, this.canvas.height);
         // players
         const playerFD = {
             density: 0.0,
@@ -172,33 +179,12 @@ export class Device implements GameStateMachine {
     }
 
     private draw() {
-        if (!this._context) return;
-        const context: CanvasRenderingContext2D = this._context;
-        context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        const gameState = this.netcode.getGameStateToRender();
-        for (let body = gameState.world.getBodyList(); body; body = body.getNext()) {
-            if (!body.getUserData()) continue;
-            if (body.isStatic()) {
-                let width = (<any>body.getUserData()).width;
-                let height = (<any>body.getUserData()).height;
-                context.fillStyle = '#708090';
-                context.fillRect(
-                    body.getPosition().x * config.physics.worldScale - width / 2,
-                    body.getPosition().y * config.physics.worldScale - height / 2,
-                    width, height);
+        this.renderer.render(this._interpolation);
 
-            } else {
-                let player: PlayerConfig = <any>body.getUserData();
-                context.fillStyle = player.color;
-                context.fillRect(
-                    body.getPosition().x * config.physics.worldScale - player.size / 2,
-                    body.getPosition().y * config.physics.worldScale - player.size / 2,
-                    player.size, player.size);
-            }
-        }
     }
 
-    public compute(gameState: GameState): void {
+    public compute(gs: GameState): void {
+        const gameState = gs as PlanckGameState;
         // apply commands to players
         for (let command of gameState.commands) {
             if (!command || command.value === CONSTS.COMMAND_NONE) continue;

@@ -127,18 +127,15 @@ class Gui {
         angular.module('app', [])
             .controller('mainCtrl', ['$scope', ($scope) => {
                 $scope.info = {
-                    btnBackwardEnabled: false,
-                    btnPauseEnabled: false,
                     btnStopEnabled: false,
                     btnPlayEnabled: true,
-                    btnForwardEnabled: false,
                     btnSaveEnabled: true,
-                    slowFactor: 20,
                     tick: config.network.tickMs,
                     algorithm: 'naive',
                     latency: { min: config.network.minLatency, max: config.network.maxLatency },
                     realtimeGameStates: true,
                     realtimeLogs: true,
+                    interpolation: false,
                     logsPlayer1: [],
                     logsPlayer2: [],
                     gamestatesPlayer1: [],
@@ -146,6 +143,10 @@ class Gui {
                 };
 
                 this.devicePlayer1.deviceUpdatedEmitter.addEventListener(() => {
+                    $scope.$apply();
+                });
+
+                this.devicePlayer2.deviceUpdatedEmitter.addEventListener(() => {
                     $scope.$apply();
                 });
 
@@ -185,12 +186,6 @@ class Gui {
                     }
                 });
 
-                $scope.backward = () => {
-                    alert('backward');
-                };
-                $scope.pause = () => {
-                    alert('pause');
-                };
                 $scope.stop = () => {
                     this.devicePlayer1.pause();
                     this.devicePlayer2.pause();
@@ -211,8 +206,8 @@ class Gui {
                     this.devicePlayer2.reset();
                     this.devicePlayer1.connect(this.devicePlayer2);
                     this.devicePlayer2.connect(this.devicePlayer1);
-                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max);
-                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max);
+                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation);
+                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation);
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
                     $scope.checkRealtimeInfo();
@@ -233,8 +228,9 @@ class Gui {
                         $scope.info.logsPlayer2 = [];
                     }
                 };
-                $scope.forward = () => {
-                    alert('forward');
+                $scope.changeInterpolation = () => {
+                    this.devicePlayer1.interpolation = $scope.info.interpolation;
+                    this.devicePlayer2.interpolation = $scope.info.interpolation;
                 };
                 $scope.saveAll = () => {
                     const date = new Date();

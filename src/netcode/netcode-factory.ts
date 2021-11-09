@@ -1,14 +1,14 @@
 import { GameStateMachine } from '../model';
 import { Log } from '../systems';
 import { BaseNetCode } from './base-netcode';
-import { NaiveAlg } from './naive';
+import { NaiveNetCode } from './naive-netcode';
 
 export class NetCodeFactory {
     constructor() { }
     public static build(algorithm: string, log: Log, gameStateMachine: GameStateMachine): BaseNetCode {
         switch (algorithm) {
-            case 'naive': return new NaiveAlg(log, gameStateMachine);
-            default: return new NaiveAlg(log, gameStateMachine);
+            case 'naive': return new NaiveNetCode(log, gameStateMachine);
+            default: return new NaiveNetCode(log, gameStateMachine);
         }
     }
 }
