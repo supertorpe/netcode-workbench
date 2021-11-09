@@ -32,6 +32,7 @@ export class Device implements GameStateMachine {
     private _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     private netcode!: BaseNetCode;
     private renderer!: Renderer;
+    private _npcs: number = 0;
     private _interpolation: boolean = true;
 
     constructor(
@@ -68,7 +69,16 @@ export class Device implements GameStateMachine {
         this._networkConn.closeConnections();
     }
 
-    public play(algorithm: string, tickMs: number, minLatency: number, maxLatency: number, interpolation: boolean, debugBoxes: boolean) {
+    public play(
+        algorithm: string,
+        tickMs: number,
+        minLatency: number,
+        maxLatency: number,
+        npcs: number,
+        interpolation: boolean,
+        debugBoxes: boolean) {
+        // npcs
+        this._npcs = npcs;
         // network latency
         this._networkConn.minLatency = minLatency;
         this._networkConn.maxLatency = maxLatency;
@@ -152,6 +162,32 @@ export class Device implements GameStateMachine {
             );
             plyr.setUserData(player);
         });
+        // NPCs
+        const npcFD = {
+            density: 0.0,
+            restitution: 1
+        };
+        let size = 20;
+        for (let i = 0; i < this._npcs; i++) {
+            const bodyNpc = world.createBody({
+                type: "dynamic",
+                position: planck.Vec2(
+                    (35 + (i * size) + size / 2) / config.physics.worldScale,
+                    (35 + (i * size) + size / 2) / config.physics.worldScale
+                ),
+                allowSleep: false,
+                awake: true
+            });
+            bodyNpc.createFixture(
+                planck.Box(size / 2 / config.physics.worldScale, size / 2 / config.physics.worldScale),
+                npcFD
+            );
+            bodyNpc.setUserData({
+                id: 100 + i,
+                size: size,
+                color: 'black'
+            });
+        };
         return world;
     }
 

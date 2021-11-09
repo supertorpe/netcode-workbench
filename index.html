@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-ng-app="app">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,6 +19,7 @@
         }
     </style>
 </head>
+
 <body class="ng-cloak" data-ng-controller="mainCtrl">
     <div id="controlPanel">
         <div class="row">
@@ -38,11 +40,11 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                    <label for="txtLatency">Latency (ms)</label>
-                    <input type="number" min="0" max="9999" maxlength="4" id="txtMinLatency" class="input-small"
-                        data-ng-model="info.latency.min" /> -
-                    <input type="number" min="0" max="9999" maxlength="4" id="txtMaxLatency" class="input-small"
-                        data-ng-model="info.latency.max" />
+                        <label for="txtLatency">Latency (ms)</label>
+                        <input type="number" min="0" max="9999" maxlength="4" id="txtMinLatency" class="input-small"
+                            data-ng-model="info.latency.min" /> -
+                        <input type="number" min="0" max="9999" maxlength="4" id="txtMaxLatency" class="input-small"
+                            data-ng-model="info.latency.max" />
                     </div>
                 </div>
             </div>
@@ -53,6 +55,9 @@
                     <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled"><i
                             class="fas fa-download"></i></button>
                 </div>
+                <label for="txtTick">NPCs</label>
+                <input type="number" min="0" max="10" maxlength="2" id="txtNPCs" class="input-small"
+                    data-ng-model="info.npcs" />
             </div>
             <div class="col-sm">
                 <input id="cbInterpolation" type="checkbox" data-ng-model="info.interpolation"
@@ -118,4 +123,5 @@
     </div>
     <script type="module" src="/src/main.ts"></script>
 </body>
+
 </html>

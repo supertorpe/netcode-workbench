@@ -133,6 +133,7 @@ class Gui {
                     tick: config.network.tickMs,
                     algorithm: 'naive',
                     latency: { min: config.network.minLatency, max: config.network.maxLatency },
+                    npcs: 0,
                     realtimeGameStates: false,
                     realtimeLogs: false,
                     interpolation: true,
@@ -207,8 +208,8 @@ class Gui {
                     this.devicePlayer2.reset();
                     this.devicePlayer1.connect(this.devicePlayer2);
                     this.devicePlayer2.connect(this.devicePlayer1);
-                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation, $scope.info.debugBoxes);
-                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.interpolation, $scope.info.debugBoxes);
+                    this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                    this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.latency.min, $scope.info.latency.max, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
                     $scope.checkRealtimeInfo();
