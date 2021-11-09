@@ -55,8 +55,11 @@ export class PlanckRenderer extends Renderer {
         if (nextGameStateTime) {
             // we want to render previous game state, so rewind 1 tick in time
             currentTime -= (nextGameStateTime - gameStateTime);
+            if (currentTime > nextGameStateTime) {
+                currentTime = nextGameStateTime;
+            }
         }
-
+        
         const interpolationInfo = new InterpolationInfo(
             currentTime,
             gameState,
