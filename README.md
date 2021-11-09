@@ -5,6 +5,7 @@
 ## Features
 - Network abstraction with latency simulation
 - Configurable tick duration
+- Parametrizable interpolation
 - Realtime and downloadable logs and game state history
 - Easily extensible inheriting from the BaseNetCode class
 - Simple game simulation with planck-js physics engine
@@ -12,7 +13,6 @@
 ### TO DO
 - Add more netcode algorithms
 - Packet drop simulation
-- Parametrizable interpolation
 
 ## Screenshot
 <img src="https://supertorpe.github.io/netcode-workbench/assets/screenshot.png" />
