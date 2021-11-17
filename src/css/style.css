@@ -39,3 +39,11 @@ canvas {
 .small-text {
   font-size: 0.9em;
 }
+table {
+  margin: 2px;
+  max-height: 800px !important;
+  overflow: hidden !important;
+}
+table th, table td {
+  padding: 2px;
+}

@@ -22,58 +22,73 @@
 
 <body class="ng-cloak" data-ng-controller="mainCtrl">
     <div id="controlPanel">
-        <div class="row">
-            <div class="col-sm">
-                <div class="row">
-                    <div class="col">
-                        <label for="selAlgorithm">Algorithm</label>
-                        <select id="selAlgorithm" data-ng-model="info.algorithm">
-                            <option>naive</option>
-                            <option>stibbons</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <label for="txtTick">Tick (ms)</label>
-                        <input type="number" min="10" max="999" maxlength="3" id="txtTick" class="input-small"
-                            data-ng-model="info.tick" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="txtLatency">Latency (ms)</label>
-                        <input type="number" min="0" max="9999" maxlength="4" id="txtMinLatency" class="input-small"
-                            data-ng-model="info.latency.min" /> -
-                        <input type="number" min="0" max="9999" maxlength="4" id="txtMaxLatency" class="input-small"
-                            data-ng-model="info.latency.max" />
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm">
-                <div class="button-group">
-                    <button data-ng-click="stop()" data-ng-if="info.btnStopEnabled"><i class="fas fa-stop"></i></button>
-                    <button data-ng-click="play()" data-ng-if="info.btnPlayEnabled"><i class="fas fa-play"></i></button>
-                    <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled"><i
-                            class="fas fa-download"></i></button>
-                </div>
-                <label for="txtTick">NPCs</label>
-                <input type="number" min="0" max="10" maxlength="2" id="txtNPCs" class="input-small"
-                    data-ng-model="info.npcs" />
-            </div>
-            <div class="col-sm">
-                <input id="cbInterpolation" type="checkbox" data-ng-model="info.interpolation"
-                    data-ng-change="changeInterpolation()" />
-                <label for="cbGameStates">Interpolation/Prediction</label>
-                <input id="cbDebugBoxes" type="checkbox" data-ng-model="info.debugBoxes"
-                    data-ng-change="changeDebugBoxes()" />
-                <label for="cbDebugBoxes">Debug boxes</label>
-                <legend>Realtime info (hurts performance)</legend>
-                <input id="cbGameStates" type="checkbox" data-ng-model="info.realtimeGameStates"
-                    data-ng-change="checkRealtimeInfo()" />
-                <label for="cbGameStates">Game States</label>
-                <input id="cbLogs" type="checkbox" data-ng-model="info.realtimeLogs"
-                    data-ng-change="checkRealtimeInfo()" />
-                <label for="cbLogs">Logs</label>
-            </div>
+        <table class="striped">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="Property">Algorithm</td>
+                    <td data-label="Value"><select id="selAlgorithm" data-ng-model="info.algorithm">
+                        <option>naive</option>
+                        <option>stibbons</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Tick (ms)</td>
+                    <td data-label="Value"><input id="txtTick" type="number" min="10" max="999" maxlength="3"
+                        data-ng-model="info.tick" /></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Min (ms)</td>
+                    <td data-label="Value"><input type="number" min="0" max="9999" maxlength="4" id="txtMinLatency" 
+                        data-ng-model="info.latency.min" />
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Max (ms)</td>
+                    <td data-label="Value">
+                    <input type="number" min="0" max="9999" maxlength="4" id="txtMaxLatency" 
+                        data-ng-model="info.latency.max" />
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Property">NPCs</td>
+                    <td data-label="Value"><input type="number" min="0" max="10" maxlength="2" id="txtNPCs" class="input-small"
+                        data-ng-model="info.npcs" /></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Smoothing</td>
+                    <td data-label="Value"><input id="cbInterpolation" type="checkbox" data-ng-model="info.interpolation"
+                        data-ng-change="changeInterpolation()" /></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Debug boxes</td>
+                    <td data-label="Value"><input id="cbDebugBoxes" type="checkbox" data-ng-model="info.debugBoxes"
+                        data-ng-change="changeDebugBoxes()" /></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>Realtime info (hurts performance)</strong></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Game States</td>
+                    <td data-label="Value"><input id="cbGameStates" type="checkbox" data-ng-model="info.realtimeGameStates"
+                        data-ng-change="checkRealtimeInfo()" /></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Logs</td>
+                    <td data-label="Value"><input id="cbLogs" type="checkbox" data-ng-model="info.realtimeLogs"
+                        data-ng-change="checkRealtimeInfo()" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="button-group">
+            <button data-ng-click="stop()" data-ng-if="info.btnStopEnabled"><i class="fas fa-stop"></i></button>
+            <button data-ng-click="play()" data-ng-if="info.btnPlayEnabled"><i class="fas fa-play"></i></button>
+            <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled"><i class="fas fa-download"></i></button>
         </div>
     </div>
     <div id="player1GameStates">

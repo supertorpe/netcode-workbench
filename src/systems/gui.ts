@@ -50,10 +50,9 @@ class Gui {
         jsPanel.create({
             headerTitle: 'Control Panel',
             theme: 'dimgrey',
-            dragit: false,
-            headerControls: { close: 'remove', maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove' },
-            panelSize: { width: '100%', height: '150px' },
-            position: { my: 'left-top', at: 'left-top', offsetX: '0', offsetY: 'calc(100vh - 150px)' },
+            headerControls: { close: 'remove', size: 'xs' },
+            panelSize: { width: '350px', height: '100%' },
+            position: { my: 'left-top', at: 'left-top', offsetX: '0', offsetY: '0' },
             content: document.getElementById('controlPanel')
         });
 
@@ -65,8 +64,8 @@ class Gui {
             contentOverflow: 'auto',
             headerControls: { close: 'remove', size: 'xs' },
             resizeit: { handles: 'n,s' },
-            panelSize: { width: '350px', height: 'calc(100vh - 150px)' },
-            position: { my: 'left-top', at: 'left-top', offsetX: '0', offsetY: '0' },
+            panelSize: { width: '350px', height: '50%' },
+            position: { my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 350px)', offsetY: '0' },
             content: document.getElementById('player1GameStates')
         });
         // Canvas
@@ -75,7 +74,7 @@ class Gui {
             theme: 'DarkSlateBlue',
             contentOverflow: 'hide',
             headerControls: { close: 'remove', size: 'xs' },
-            panelSize: { width: 'calc(50vw - 350px)', height: 'calc(100vh - 350px)' },
+            panelSize: { width: 'calc(50vw - 350px)', height: '50%' },
             position: { my: 'left-top', at: 'left-top', offsetX: '350px', offsetY: '0' },
             content: document.getElementById('player1Canvas')
         });
@@ -85,8 +84,8 @@ class Gui {
             theme: 'RoyalBlue',
             contentOverflow: 'auto',
             headerControls: { close: 'remove', size: 'xs' },
-            panelSize: { width: 'calc(50vw - 350px)', height: '200px' },
-            position: { my: 'left-top', at: 'left-top', offsetX: '350px', offsetY: 'calc(100vh - 350px)' },
+            panelSize: { width: 'calc(100vw - 700px)', height: '25%' },
+            position: { my: 'left-top', at: 'left-top', offsetX: '350px', offsetY: '50%' },
             content: document.getElementById('player1Logs')
         });
 
@@ -97,8 +96,8 @@ class Gui {
             theme: 'olive',
             contentOverflow: 'auto',
             headerControls: { close: 'remove', size: 'xs' },
-            panelSize: { width: '350px', height: 'calc(100vh - 150px)' },
-            position: { my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 350px)', offsetY: '0' },
+            panelSize: { width: '350px', height: '50%' },
+            position: { my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 350px)', offsetY: '50%' },
             content: document.getElementById('player2GameStates')
         });
         // Canvas
@@ -107,7 +106,7 @@ class Gui {
             theme: 'OliveDrab',
             contentOverflow: 'hide',
             headerControls: { close: 'remove', size: 'xs' },
-            panelSize: { width: 'calc(50vw - 350px)', height: 'calc(100vh - 350px)' },
+            panelSize: { width: 'calc(50vw - 350px)', height: '50%' },
             position: { my: 'left-top', at: 'left-top', offsetX: '50vw', offsetY: '0' },
             content: document.getElementById('player2Canvas')
         });
@@ -117,8 +116,8 @@ class Gui {
             theme: 'LightGreen',
             contentOverflow: 'auto',
             headerControls: { close: 'remove', size: 'xs' },
-            panelSize: { width: 'calc(50vw - 350px)', height: '200px' },
-            position: { my: 'left-top', at: 'left-top', offsetX: '50vw', offsetY: 'calc(100vh - 350px)' },
+            panelSize: { width: 'calc(100vw - 700px)', height: '25%' },
+            position: { my: 'left-top', at: 'left-top', offsetX: '350px', offsetY: '75%' },
             content: document.getElementById('player2Logs')
         });
     }
