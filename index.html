@@ -32,32 +32,32 @@
             <tbody>
                 <tr>
                     <td data-label="Property">Algorithm</td>
-                    <td data-label="Value"><select id="selAlgorithm" data-ng-model="info.algorithm">
+                    <td data-label="Value"><select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm">
                         <option>naive</option>
                         <option>stibbons</option>
                     </select></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Tick (ms)</td>
-                    <td data-label="Value"><input id="txtTick" type="number" min="10" max="999" maxlength="3"
+                    <td data-label="Value"><input id="txtTick" class="input-small" type="number" min="10" max="999" maxlength="3"
                         data-ng-model="info.tick" /></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Min (ms)</td>
-                    <td data-label="Value"><input type="number" min="0" max="9999" maxlength="4" id="txtMinLatency" 
+                    <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency" 
                         data-ng-model="info.latency.min" />
                     </td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Max (ms)</td>
                     <td data-label="Value">
-                    <input type="number" min="0" max="9999" maxlength="4" id="txtMaxLatency" 
+                    <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency" 
                         data-ng-model="info.latency.max" />
                     </td>
                 </tr>
                 <tr>
                     <td data-label="Property">NPCs</td>
-                    <td data-label="Value"><input type="number" min="0" max="10" maxlength="2" id="txtNPCs" class="input-small"
+                    <td data-label="Value"><input type="number" class="input-small" min="0" max="10" maxlength="2" id="txtNPCs"
                         data-ng-model="info.npcs" /></td>
                 </tr>
                 <tr>
@@ -71,7 +71,7 @@
                         data-ng-change="changeDebugBoxes()" /></td>
                 </tr>
                 <tr>
-                    <td colspan="2"><strong>Realtime info (hurts performance)</strong></td>
+                    <td colspan="2" class="center-text"><strong>Realtime info (hurts performance)</strong></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Game States</td>
