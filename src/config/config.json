@@ -6,9 +6,25 @@
         },
         "network": {
             "tickMs": 50,
-            "minLatency": 10,
-            "maxLatency": 30
+            "minLatency1": 10,
+            "maxLatency1": 30,
+            "minLatency2": 10,
+            "maxLatency2": 30
         },
+        "netcodes": [
+            {
+                "name": "p2p-naive",
+                "type": "p2p"
+            },
+            {
+                "name": "p2p-stibbons",
+                "type": "p2p"
+            },
+            {
+                "name": "cs-lockstep",
+                "type": "cs"
+            }
+        ],
         "players": [
             {
                 "id": 1,

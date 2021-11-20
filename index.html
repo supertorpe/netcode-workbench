@@ -21,6 +21,7 @@
 </head>
 
 <body class="ng-cloak" data-ng-controller="mainCtrl">
+    <!-- CONTROL PANEL -->
     <div id="controlPanel">
         <table class="striped">
             <thead>
@@ -32,28 +33,14 @@
             <tbody>
                 <tr>
                     <td data-label="Property">Algorithm</td>
-                    <td data-label="Value"><select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm">
-                        <option>naive</option>
-                        <option>stibbons</option>
+                    <td data-label="Value">
+                        <select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm" data-ng-options="item as item.name for item in info.netcodes" data-ng-change="changeAlgorithm()">
                     </select></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Tick (ms)</td>
                     <td data-label="Value"><input id="txtTick" class="input-small" type="number" min="10" max="999" maxlength="3"
                         data-ng-model="info.tick" /></td>
-                </tr>
-                <tr>
-                    <td data-label="Property">Latency Min (ms)</td>
-                    <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency" 
-                        data-ng-model="info.latency.min" />
-                    </td>
-                </tr>
-                <tr>
-                    <td data-label="Property">Latency Max (ms)</td>
-                    <td data-label="Value">
-                    <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency" 
-                        data-ng-model="info.latency.max" />
-                    </td>
                 </tr>
                 <tr>
                     <td data-label="Property">NPCs</td>
@@ -69,6 +56,38 @@
                     <td data-label="Property">Debug boxes</td>
                     <td data-label="Value"><input id="cbDebugBoxes" type="checkbox" data-ng-model="info.debugBoxes"
                         data-ng-change="changeDebugBoxes()" /></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center-text"><strong>Player 1 Latency</strong></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Min (ms)</td>
+                    <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency1" 
+                        data-ng-model="info.latency1.min" />
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Max (ms)</td>
+                    <td data-label="Value">
+                    <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency1" 
+                        data-ng-model="info.latency1.max" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center-text"><strong>Player 2 Latency</strong></td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Min (ms)</td>
+                    <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency2" 
+                        data-ng-model="info.latency2.min" />
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Latency Max (ms)</td>
+                    <td data-label="Value">
+                    <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency2" 
+                        data-ng-model="info.latency2.max" />
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="2" class="center-text"><strong>Realtime info (hurts performance)</strong></td>
@@ -91,7 +110,8 @@
             <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled"><i class="fas fa-download"></i></button>
         </div>
     </div>
-    <div id="player1GameStates">
+    <!-- PLAYER 1 -->
+    <div id="player1GameStates" class="gameState">
         <div class="card" data-ng-repeat="item in info.gamestatesPlayer1">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
@@ -113,7 +133,8 @@
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
-    <div id="player2GameStates">
+    <!-- PLAYER 2 -->
+    <div id="player2GameStates" class="gameState">
         <div class="card" data-ng-repeat="item in info.gamestatesPlayer2">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
@@ -133,6 +154,28 @@
     </div>
     <div id="player2Logs">
         <p data-ng-repeat="trace in info.logsPlayer2" class="logs"
+            data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
+            {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
+    </div>
+    <!-- SERVER -->
+    <div id="serverGameStates" class="gameState">
+        <div class="card" data-ng-repeat="item in info.gamestatesServer">
+            <div class="section">Tick: {{::item.tick}}</div>
+            <div class="section">
+                <div class="small-text" data-ng-repeat="player in item.players">P{{::player.id}} [{{::player.x}} ,
+                    {{::player.y}}]</div>
+            </div>
+            <div class="section">
+                Commands: <span data-ng-repeat="command in item.commands">P{{::command.playerId}}:{{::command.value}}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="serverCanvas">
+        <canvas id="serverGameArea" class="gameArea" width="300px" height="250px"></canvas>
+    </div>
+    <div id="serverLogs">
+        <p data-ng-repeat="trace in info.logsServer" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>

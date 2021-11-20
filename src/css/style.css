@@ -10,10 +10,14 @@ canvas {
   border: 1px solid;
   margin: 0;
   position: absolute;
-  top: 50%;
-  left: calc((100% - 300px) / 2);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
+  top: calc(100% - 256px);
+  left: calc((100% - 302px) / 2);
+
+}
+.gameState div, .gameState span {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  white-space:nowrap;
 }
 .logs {
   font-family: 'Courier New', monospace;
@@ -42,6 +46,9 @@ canvas {
 }
 option {
   font-size: 0.9em;
+}
+.card {
+  max-width: calc(100% - 16px);
 }
 table {
   margin: 2px;

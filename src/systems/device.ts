@@ -1,29 +1,16 @@
-import { config, PlayerConfig } from '../config';
+import { config, CONSTS } from '../config';
 import { Message, NetworkConn } from './network-conn';
 import { Log } from './log';
 import { EventEmitter } from './event-emitter';
 import { input } from './input';
-import { PlanckGameState, GameStateLog, GameStateMachine, GameState } from '../model';
+import { PlanckGameState, GameStateLog } from '../model';
 import { BaseNetCode, NetCodeFactory } from '../netcode';
 import * as planck from 'planck-js';
 import { PlanckRenderer } from './planck-renderer';
 import { Renderer } from './renderer';
+import { PlanckGameStateMachine } from './planck-gamestate-machine';
 
-const CONSTS = {
-    COMMAND_NONE: 0,
-
-    COMMAND_UP: 1,
-    COMMAND_DOWN: 2,
-    COMMAND_LEFT: 10,
-    COMMAND_RIGHT: 20,
-
-    COMMAND_UP_LEFT: 11,
-    COMMAND_UP_RIGHT: 21,
-    COMMAND_DOWN_LEFT: 12,
-    COMMAND_DOWN_RIGHT: 22
-};
-
-export class Device implements GameStateMachine {
+export class Device {
 
     private running = false;
     private _log: Log;
@@ -31,6 +18,7 @@ export class Device implements GameStateMachine {
     private _networkConn: NetworkConn;
     private _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     private netcode!: BaseNetCode;
+    private gameStateMachine!: PlanckGameStateMachine;
     private renderer!: Renderer;
     private _npcs: number = 0;
     private _interpolation: boolean = true;
@@ -77,6 +65,12 @@ export class Device implements GameStateMachine {
         npcs: number,
         interpolation: boolean,
         debugBoxes: boolean) {
+        // gameStateMachine
+        this.gameStateMachine = new PlanckGameStateMachine(this._log, tickMs / 1000);
+        // initialize netcode
+        const netcode = NetCodeFactory.build(algorithm, this._log, this.gameStateMachine);
+        if (netcode !== null) this.netcode = netcode;
+        else return;
         // npcs
         this._npcs = npcs;
         // network latency
@@ -89,8 +83,6 @@ export class Device implements GameStateMachine {
         //  initialize game state
         const initialGameState = new PlanckGameState(0, world);
         initialGameState.peerCount = 2;
-        // initialize netcode
-        this.netcode = NetCodeFactory.build(algorithm, this._log, this);
         this.netcode.tickMs = tickMs;
         this.netcode.start(initialGameState);
         // initialize renderer
@@ -218,31 +210,6 @@ export class Device implements GameStateMachine {
 
     private draw() {
         this.renderer.render(this._interpolation);
-    }
-
-    public compute(gs: GameState): void {
-        const gameState = gs as PlanckGameState;
-        // apply commands to players
-        for (let command of gameState.commands) {
-            if (!command || command.value === CONSTS.COMMAND_NONE) continue;
-            const body = gameState.bodies.find(body => (body.getUserData() ? (<PlayerConfig>body.getUserData()).id : -1) == command.playerId);
-            if (body) {
-                const forceX = (command.value == CONSTS.COMMAND_RIGHT || command.value == CONSTS.COMMAND_DOWN_RIGHT || command.value == CONSTS.COMMAND_UP_RIGHT
-                    ? config.physics.strength
-                    : command.value == CONSTS.COMMAND_LEFT || command.value == CONSTS.COMMAND_DOWN_LEFT || command.value == CONSTS.COMMAND_UP_LEFT
-                        ? -1 * config.physics.strength
-                        : 0);
-                const forceY = (command.value == CONSTS.COMMAND_DOWN || command.value == CONSTS.COMMAND_DOWN_LEFT || command.value == CONSTS.COMMAND_DOWN_RIGHT
-                    ? config.physics.strength
-                    : command.value == CONSTS.COMMAND_UP || command.value == CONSTS.COMMAND_UP_LEFT || command.value == CONSTS.COMMAND_UP_RIGHT
-                        ? -1 * config.physics.strength
-                        : 0);
-                this.log.logInfo(`apply command value ${command.value} to P${command.playerId}: force(x=${forceX} y=${forceY})`);
-                body.applyForce(planck.Vec2(forceX, forceY), body.getWorldCenter());
-            }
-        }
-        gameState.world.step(this.netcode.tickMs / 1000);
-        gameState.world.clearForces();
     }
 
     private messageReceived(message: Message) {

@@ -16,8 +16,10 @@
 - Packet drop simulation
 
 ### Available NetCodes
-- naive: it only keeps one Game State in memory. 'Naive' sends and receives commands on every tick. If there are remote commands pending (due to lag), it waits before generating next Game State: latency affects it a lot. This doesn't allow real interpolation: the position of each body can be calculated from the time elapsed since the tick and the position and velocity of the body. When latency or tick period is high, this calculation gives wrong results (as it ignores collisions)
-- stibbons: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better.
+#### P2P
+- p2p-naive: it only keeps one Game State in memory. 'Naive' sends and receives commands on every tick. If there are remote commands pending (due to lag), it waits before generating next Game State: latency affects it a lot. This doesn't allow real interpolation: the position of each body can be calculated from the time elapsed since the tick and the position and velocity of the body. When latency or tick period is high, this calculation gives wrong results (as it ignores collisions)
+- p2p-stibbons: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better.
+#### Client-Server
 
 ## Screenshot
 <img src="https://supertorpe.github.io/netcode-workbench/assets/screenshot.png" />

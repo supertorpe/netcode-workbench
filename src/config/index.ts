@@ -3,8 +3,11 @@ import configJson from './config.json';
 export class CanvasConfig {
     constructor(public width: number, public height: number) { }
 }
+export class NetcodeConfig {
+    constructor(public name: string, public type: string) { }
+}
 export class NetworkConfig {
-    constructor(public tickMs: number, public minLatency: number, public maxLatency: number) { }
+    constructor(public tickMs: number, public minLatency1: number, public maxLatency1: number, public minLatency2: number, public maxLatency2: number) { }
 }
 export class PlayerConfig {
     constructor(
@@ -18,6 +21,7 @@ export class PhysicsConfig {
 export class Config {
     constructor(
         public canvas: CanvasConfig,
+        public netcodes: NetcodeConfig[],
         public network: NetworkConfig,
         public players: PlayerConfig[],
         public physics: PhysicsConfig
@@ -25,3 +29,4 @@ export class Config {
 }
 
 export const config: Config = (<any>configJson).config;
+export * from './consts';

@@ -37,8 +37,7 @@
                 <tr>
                     <td data-label="Property">Algorithm</td>
                     <td data-label="Value"><select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm">
-                        <option>naive</option>
-                        <option>stibbons</option>
+                        <option data-ng-repeat="item in info.netcodes">{{::item.name}}</option>
                     </select></td>
                 </tr>
                 <tr>
