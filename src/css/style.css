@@ -50,10 +50,14 @@ option {
 .card {
   max-width: calc(100% - 16px);
 }
+.toolbar-icon {
+  color: white;
+}
 table {
   margin: 2px;
-  max-height: 800px !important;
-  overflow: hidden !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 table th, table td {
   padding: 2px;

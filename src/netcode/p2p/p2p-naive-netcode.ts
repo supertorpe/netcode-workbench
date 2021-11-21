@@ -1,23 +1,21 @@
-import { Command, GameState, GameStateLog } from '../model';
-import { BaseNetCode } from './base-netcode';
+import { Command, GameState, GameStateLog } from '../../model';
+import { BaseNetCode } from '../base-netcode';
 
 /*
-  'p2p-stibbons' algorithm:
-  - Tracks 2 GameStates
+  'p2p-naive' algorithm:
+  - Only track 1 GameState (the current one)
   - Every tick:
     - send the command
     - build a new GameState
 */
-export class P2PStibbonsNetCode extends BaseNetCode {
+export class P2PNaiveNetCode extends BaseNetCode {
 
   private localCommand: Command | undefined;
   private localCommandDumped = false;
   private remoteCommands: Command[] = [];
-  private prevGameState: GameState | undefined;
 
   public start(initialGameState: GameState): number {
     return super.start(initialGameState);
-    this.prevGameState = initialGameState;
   }
 
   public tick(): GameStateLog | null {
@@ -47,7 +45,6 @@ export class P2PStibbonsNetCode extends BaseNetCode {
         this.log.logInfo(this._initialGameState.toString());
         result = this._initialGameState.toLog();
         // compute next state
-        this.prevGameState = this._initialGameState.clone();
         this.gameStateMachine.compute(this._initialGameState);
         this._currentTick++;
         this._initialGameState.incTick();
@@ -75,16 +72,12 @@ export class P2PStibbonsNetCode extends BaseNetCode {
   }
 
   public getGameStateToRender(): GameState {
-    return (this.prevGameState ? this.prevGameState : this._initialGameState);
+    return this._initialGameState;
   }
 
   public getGameState(tick: number): GameState | null {
-    if (this._initialGameState.tick === tick)
-      return this._initialGameState;
-    else if (this.prevGameState && this.prevGameState.tick === tick)
-      return this.prevGameState;
-    else
-      return null;
+    if (this._initialGameState.tick === tick) return this._initialGameState;
+    else return null;
   }
 
 }

@@ -3,7 +3,7 @@
 [Netcode Workbench](https://supertorpe.github.io/netcode-workbench/) is a graphical console for debugging netcode algorithms.
 
 ## Features
-- Network abstraction with latency simulation
+- Network abstraction with latency and packet loss simulation
 - Configurable tick duration
 - Parametrizable interpolation
 - Optionally draw debug boxes to see interpolation effect
@@ -13,7 +13,6 @@
 
 ### TO DO
 - Add more netcode algorithms
-- Packet drop simulation
 
 ### Available NetCodes
 #### P2P

@@ -1,8 +1,8 @@
-import { config, CONSTS } from '../config';
-import { Message, NetworkConn } from './network-conn';
+import { config, NetcodeConfig } from '../config';
+import { NetworkConn, NetworkInterface } from './network';
 import { Log } from './log';
 import { EventEmitter } from './event-emitter';
-import { input } from './input';
+
 import { PlanckGameState, GameStateLog } from '../model';
 import { BaseNetCode, NetCodeFactory } from '../netcode';
 import * as planck from 'planck-js';
@@ -12,29 +12,23 @@ import { PlanckGameStateMachine } from './planck-gamestate-machine';
 
 export class Device {
 
-    private running = false;
-    private _log: Log;
-    private _gameStateHistory: GameStateLog[];
-    private _networkConn: NetworkConn;
-    private _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
-    private netcode!: BaseNetCode;
-    private gameStateMachine!: PlanckGameStateMachine;
-    private renderer!: Renderer;
-    private _npcs: number = 0;
-    private _interpolation: boolean = true;
+    protected running = false;
+    protected _log: Log;
+    protected _gameStateHistory: GameStateLog[];
+    protected _networkInterface: NetworkInterface;
+    protected _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
+    protected netcode!: BaseNetCode;
+    protected gameStateMachine!: PlanckGameStateMachine;
+    protected renderer!: Renderer;
+    protected _npcs: number = 0;
+    protected _interpolation: boolean = true;
 
     constructor(
-        private playerId: number,
-        private keyUp: number,
-        private keyDown: number,
-        private keyLeft: number,
-        private keyRight: number,
-        private canvas: HTMLCanvasElement) {
+        protected isServer: boolean,
+        protected playerId: number,
+        protected canvas: HTMLCanvasElement) {
         this._log = new Log();
-        this._networkConn = new NetworkConn(playerId);
-        this._networkConn.commandReceivedEmitter.addEventListener((message) => {
-            this.messageReceived(message);
-        });
+        this._networkInterface = new NetworkInterface(this._log);
         this._gameStateHistory = [];
     }
 
@@ -46,36 +40,41 @@ export class Device {
     get debugBoxes(): boolean { return this.renderer.debugBoxes; }
     set debugBoxes(value: boolean) { this.renderer.debugBoxes = value; }
 
-    public connect(device: Device) {
-        this._log.logInfo(`Connected to player ${device.playerId}`);
-        this._networkConn.connect(device._networkConn);
+    public connect(device: Device,
+        minSendLatency: number, maxSendLatency: number, packetSendLoss: number,
+        minReceiveLatency: number, maxReceiveLatency: number, packetReceiveLoss: number) {
+        const conn1 = new NetworkConn(this.playerId, this._log);
+        conn1.minLatency = minSendLatency;
+        conn1.maxLatency = maxSendLatency;
+        conn1.packetLoss = packetSendLoss;
+        const conn2 = new NetworkConn(device.playerId, device._log);
+        conn2.minLatency = minReceiveLatency;
+        conn2.maxLatency = maxReceiveLatency;
+        conn2.packetLoss = packetReceiveLoss;
+        this._networkInterface.connect(conn1, conn2);
+        device._networkInterface.connect(conn2, conn1);
     }
 
     public reset() {
         this._log.clear();
         this._gameStateHistory = [];
-        this._networkConn.closeConnections();
     }
 
     public play(
-        algorithm: string,
+        algorithm: NetcodeConfig,
         tickMs: number,
-        minLatency: number,
-        maxLatency: number,
         npcs: number,
         interpolation: boolean,
         debugBoxes: boolean) {
         // gameStateMachine
         this.gameStateMachine = new PlanckGameStateMachine(this._log, tickMs / 1000);
         // initialize netcode
-        const netcode = NetCodeFactory.build(algorithm, this._log, this.gameStateMachine);
+        let algorithmName = algorithm.name + (algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
+        const netcode = NetCodeFactory.build(algorithmName, this._log, this._networkInterface, this.gameStateMachine);
         if (netcode !== null) this.netcode = netcode;
         else return;
         // npcs
         this._npcs = npcs;
-        // network latency
-        this._networkConn.minLatency = minLatency;
-        this._networkConn.maxLatency = maxLatency;
         // interpolation
         this._interpolation = interpolation;
         // initialize physics world
@@ -93,8 +92,10 @@ export class Device {
         window.requestAnimationFrame(() => { this.gameLoop(); });
     }
 
-    public pause() {
+    public stop() {
         this.running = false;
+        this._networkInterface.closeConnections();
+        this._networkInterface.resetEmitters();
     }
 
     public gameStateHistoryLog(): string {
@@ -192,28 +193,20 @@ export class Device {
         this.draw();
     }
 
-    private update() {
-        const vertical = input.isPressed(this.keyUp) ? CONSTS.COMMAND_UP : input.isPressed(this.keyDown) ? CONSTS.COMMAND_DOWN : CONSTS.COMMAND_NONE;
-        const horizontal = input.isPressed(this.keyLeft) ? CONSTS.COMMAND_LEFT : input.isPressed(this.keyRight) ? CONSTS.COMMAND_RIGHT : CONSTS.COMMAND_NONE;
-        const commandValue = vertical + horizontal;
-        const command = this.netcode.localCommandReceived(this.playerId, commandValue);
-        if (command) {
-            this.log.logInfo(`sending command: ${command.toFullString()}`);
-            this._networkConn.broadcast(command);
+    protected update() {
+        try {
+            let gamestateLog = this.netcode.tick();
+            if (gamestateLog != null) {
+                this._gameStateHistory.unshift(gamestateLog);
+            }
+        } catch(error) {
+            this._log.logError(error as string);
         }
-        let gamestateLog = this.netcode.tick();
-        if (gamestateLog != null) {
-            this._gameStateHistory.unshift(gamestateLog);
-        }
+        
         this._deviceUpdatedEmitter.notify();
     }
 
     private draw() {
         this.renderer.render(this._interpolation);
     }
-
-    private messageReceived(message: Message) {
-        this.netcode.remoteCommandReceived(message.command);
-    }
-
 }

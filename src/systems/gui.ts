@@ -12,12 +12,13 @@ import { ServerDevice } from './server-device';
 
 class Gui {
 
-    //private deviceServer: ServerDevice;
+    private deviceServer: ServerDevice;
     private devicePlayer1: ClientDevice;
     private devicePlayer2: ClientDevice;
 
     private p2pmode = true;
 
+    private panelControl: any;
     private panelCanvas1: any;
     private panelGamestates1: any;
     private panelLog1: any;
@@ -29,7 +30,9 @@ class Gui {
     private panelLogS: any;
 
     constructor() {
-        //this.deviceServer = new ServerDevice();
+        this.deviceServer = new ServerDevice(
+            0,
+            document.getElementById('serverGameArea') as HTMLCanvasElement);
         this.devicePlayer1 = new ClientDevice(
             config.players[0].id,
             config.players[0].keyUp,
@@ -57,7 +60,7 @@ class Gui {
         ///////////////
 
         // CONTROL PANEL //
-        jsPanel.create({
+        this.panelControl = jsPanel.create({
             headerTitle: 'Control Panel',
             theme: 'dimgrey',
             headerControls: { close: 'remove', size: 'xs' },
@@ -164,41 +167,48 @@ class Gui {
         });
     }
 
-    private updateLayout() {
+    private resetLayout() {
+        this.panelControl.reposition({ my: 'left-top', at: 'left-top', offsetX: '0', offsetY: '0' });
+        this.panelControl.resize({ width: '18em', height: '100%' });
         if (this.p2pmode) {
             // reposition players windows
             this.panelGamestates1.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em)', offsetY: '0' });
             this.panelGamestates1.resize({ width: '22em', height: '50%' });
             this.panelCanvas1.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(18em + (100vw - 40em - 620px) / 3)', offsetY: '0' });
+            this.panelCanvas1.resize({ width: '310px', height: 'calc(250px + 4.5em)' });
             this.panelLog1.reposition({ my: 'left-top', at: 'left-top', offsetX: '18em', offsetY: 'calc(250px + 4.5em)' });
             this.panelLog1.resize({ width: 'calc(100vw - 40em)', height: 'calc((100vh - 250px - 4.5em) / 2)' });
             this.panelGamestates2.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em)', offsetY: '50%' });
             this.panelGamestates2.resize({ width: '22em', height: '50%' });
             this.panelCanvas2.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em - 310px - (100vw - 40em - 620px) / 3)', offsetY: '0' });
+            this.panelCanvas2.resize({ width: '310px', height: 'calc(250px + 4.5em)' });
             this.panelLog2.reposition({ my: 'left-top', at: 'left-top', offsetX: '18em', offsetY: 'calc(250px + 4.5em + (100vh - 250px - 4.5em) / 2)' });
             this.panelLog2.resize({ width: 'calc(100vw - 40em)', height: 'calc((100vh - 250px - 4.5em) / 2)' });
             // hide server windows
             //*
-            this.panelGamestatesS.reposition({ my: 'left-top', at: 'left-top', offsetX: '-1000vw', offsetY: '-1000vh' });
-            this.panelCanvasS.reposition({ my: 'left-top', at: 'left-top', offsetX: '-1000vw', offsetY: '-1000vh' });
-            this.panelLogS.reposition({ my: 'left-top', at: 'left-top', offsetX: '-1000vw', offsetY: '-1000vh' });
+            this.panelGamestatesS.reposition({ my: 'left-top', at: 'left-top', offsetX: '1000vw', offsetY: '1000vh' });
+            this.panelCanvasS.reposition({ my: 'left-top', at: 'left-top', offsetX: '1000vw', offsetY: '1000vh' });
+            this.panelLogS.reposition({ my: 'left-top', at: 'left-top', offsetX: '1000vw', offsetY: '1000vh' });
             //*/
         } else {
             // reposition players windows
             this.panelGamestates1.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em)', offsetY: '0' });
             this.panelGamestates1.resize({ width: '22em', height: '33%' });
             this.panelCanvas1.reposition({ my: 'left-top', at: 'left-top', offsetX: '18em', offsetY: '0' });
+            this.panelCanvas1.resize({ width: '310px', height: 'calc(250px + 4.5em)' });
             this.panelLog1.reposition({ my: 'left-top', at: 'left-top', offsetX: '18em', offsetY: 'calc(250px + 4.5em)' });
             this.panelLog1.resize({ width: 'calc(100vw - 40em - 4em)', height: 'calc(100vh - 250px - 4.5em - 4em)' });
             this.panelGamestates2.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em)', offsetY: '33%' });
             this.panelGamestates2.resize({ width: '22em', height: '33%' });
             this.panelCanvas2.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(18em + 310px)', offsetY: '0' });
+            this.panelCanvas2.resize({ width: '310px', height: 'calc(250px + 4.5em)' });
             this.panelLog2.reposition({ my: 'left-top', at: 'left-top', offsetX: '20em', offsetY: 'calc(250px + 4.5em + 2em)' });
             this.panelLog2.resize({ width: 'calc(100vw - 40em - 4em)', height: 'calc(100vh - 250px - 4.5em - 4em)' });
             // restore server windows
             this.panelGamestatesS.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(100vw - 22em)', offsetY: '66%' });
             this.panelGamestatesS.resize({ width: '22em', height: '33%' });
             this.panelCanvasS.reposition({ my: 'left-top', at: 'left-top', offsetX: 'calc(18em + 620px)', offsetY: '0' });
+            this.panelCanvasS.resize({ width: '310px', height: 'calc(250px + 4.5em)' });
             this.panelLogS.reposition({ my: 'left-top', at: 'left-top', offsetX: '22em', offsetY: 'calc(250px + 4.5em + 4em)' });
             this.panelLogS.resize({ width: 'calc(100vw - 40em - 4em)', height: 'calc(100vh - 250px - 4.5em - 4em)' });
         }
@@ -225,7 +235,9 @@ class Gui {
                     netcodes: config.netcodes,
                     algorithm: config.netcodes[0],
                     latency1: { min: config.network.minLatency1, max: config.network.maxLatency1 },
+                    packetLoss1: config.network.packetLoss1,
                     latency2: { min: config.network.minLatency2, max: config.network.maxLatency2 },
+                    packetLoss2: config.network.packetLoss2,
                     npcs: 0,
                     realtimeGameStates: false,
                     realtimeLogs: false,
@@ -243,7 +255,9 @@ class Gui {
 
                 const p2pmode = $scope.info.algorithm.type === 'p2p';
                 this.p2pmode = p2pmode;
-                this.updateLayout();
+                this.resetLayout();
+
+                $scope.resetLayout = () => { this.resetLayout(); }
 
                 // sync scrolls
                 const player1GameStates = document.getElementById('player1GameStates') as HTMLElement;
@@ -267,6 +281,10 @@ class Gui {
                         (player1Logs.parentElement as HTMLElement).scrollTop = (player2Logs.parentElement as HTMLElement).scrollTop;
                 });
 
+                this.deviceServer.deviceUpdatedEmitter.addEventListener(() => {
+                    $scope.$apply();
+                });
+
                 this.devicePlayer1.deviceUpdatedEmitter.addEventListener(() => {
                     $scope.$apply();
                 });
@@ -275,32 +293,35 @@ class Gui {
                     $scope.$apply();
                 });
 
+                const syncButtonHtml = '<button class="jsPanel-btn jsPanel-btn-menu jsPanel-btn-md tooltip bottom" aria-label="Sync scroll"><span class="fas fa-arrows-alt-v toolbar-icon" style="vertical-align: text-top"></span><input type="checkbox" checked /></button>';
+                const downloadButtonHtml = '<button class="jsPanel-btn jsPanel-btn-menu jsPanel-btn-md tooltip bottom" aria-label="Download"><span class="fas fa-download toolbar-icon"></span></button>';
+
                 this.panelGamestates1.addControl({
-                    html: '<span class="fas fa-arrows-alt-v" style="vertical-align: text-top"></span><input type="checkbox" checked>',
-                    name: 'download',
+                    html: syncButtonHtml,
+                    name: 'sync',
                     position: 1,
                     handler: () => {
                         $scope.info.syncScrollGs1 = !$scope.info.syncScrollGs1;
                     }
                 });
                 this.panelGamestates1.addControl({
-                    html: '<span class="fas fa-download"></span>',
+                    html: downloadButtonHtml,
                     name: 'download',
-                    position: 1,
+                    position: 2,
                     handler: () => {
                         $scope.saveGamestates1();
                     }
                 });
                 this.panelGamestates2.addControl({
-                    html: '<span class="fas fa-arrows-alt-v" style="vertical-align: text-top"></span><input type="checkbox" checked>',
-                    name: 'download',
+                    html: syncButtonHtml,
+                    name: 'sync',
                     position: 1,
                     handler: () => {
                         $scope.info.syncScrollGs2 = !$scope.info.syncScrollGS2;
                     }
                 });
                 this.panelGamestates2.addControl({
-                    html: '<span class="fas fa-download"></span>',
+                    html: downloadButtonHtml,
                     name: 'download',
                     position: 2,
                     handler: () => {
@@ -308,15 +329,15 @@ class Gui {
                     }
                 });
                 this.panelLog1.addControl({
-                    html: '<span class="fas fa-arrows-alt-v" style="vertical-align: text-top"></span><input type="checkbox" checked>',
-                    name: 'download',
+                    html: syncButtonHtml,
+                    name: 'sync',
                     position: 1,
                     handler: () => {
                         $scope.info.syncScrollLog1 = !$scope.info.syncScrollLog1;
                     }
                 });
                 this.panelLog1.addControl({
-                    html: '<span class="fas fa-download"></span>',
+                    html: downloadButtonHtml,
                     name: 'download',
                     position: 2,
                     handler: () => {
@@ -324,15 +345,15 @@ class Gui {
                     }
                 });
                 this.panelLog2.addControl({
-                    html: '<span class="fas fa-arrows-alt-v" style="vertical-align: text-top"></span><input type="checkbox" checked>',
-                    name: 'download',
+                    html: syncButtonHtml,
+                    name: 'sync',
                     position: 1,
                     handler: () => {
                         $scope.info.syncScrollLog2 = !$scope.info.syncScrollLog2;
                     }
                 });
                 this.panelLog2.addControl({
-                    html: '<span class="fas fa-download"></span>',
+                    html: downloadButtonHtml,
                     name: 'download',
                     position: 2,
                     handler: () => {
@@ -344,47 +365,62 @@ class Gui {
                     const p2pmode = $scope.info.algorithm.type === 'p2p';
                     if (p2pmode === this.p2pmode) return;
                     this.p2pmode = p2pmode;
-                    this.updateLayout();
+                    this.resetLayout();
                 };
 
                 $scope.stop = () => {
-                    this.devicePlayer1.pause();
-                    this.devicePlayer2.pause();
+                    this.deviceServer.stop();
+                    this.devicePlayer1.stop();
+                    this.devicePlayer2.stop();
                     $scope.info.btnStopEnabled = false;
                     $scope.info.btnPlayEnabled = true;
                     if (!$scope.info.realtimeGameStates) {
+                        $scope.info.gamestatesServer = this.deviceServer.gameStateHistory;
                         $scope.info.gamestatesPlayer1 = this.devicePlayer1.gameStateHistory;
                         $scope.info.gamestatesPlayer2 = this.devicePlayer2.gameStateHistory;
                     }
                     if (!$scope.info.realtimeLogs) {
+                        $scope.info.logsServer = this.deviceServer.log.traces;
                         $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
                         $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
                     }
                 };
                 $scope.play = () => {
                     // cleanup
+                    this.deviceServer.reset();
                     this.devicePlayer1.reset();
                     this.devicePlayer2.reset();
-                    this.devicePlayer1.connect(this.devicePlayer2);
-                    this.devicePlayer2.connect(this.devicePlayer1);
-                    this.devicePlayer1.play($scope.info.algorithm.name, $scope.info.tick, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
-                    this.devicePlayer2.play($scope.info.algorithm.name, $scope.info.tick, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                    if ($scope.info.algorithm.type === 'p2p') {
+                        this.devicePlayer1.connect(this.devicePlayer2, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                    } else {
+                        this.devicePlayer1.connect(this.deviceServer, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
+                        this.devicePlayer2.connect(this.deviceServer, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                        this.deviceServer.play($scope.info.algorithm, $scope.info.tick,$scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes)
+                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                    }
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
                     $scope.checkRealtimeInfo();
                 };
                 $scope.checkRealtimeInfo = () => {
                     if ($scope.info.realtimeGameStates) {
+                        $scope.info.gamestatesServer = this.deviceServer.gameStateHistory;
                         $scope.info.gamestatesPlayer1 = this.devicePlayer1.gameStateHistory;
                         $scope.info.gamestatesPlayer2 = this.devicePlayer2.gameStateHistory;
                     } else {
+                        $scope.info.gamestatesServer = [];
                         $scope.info.gamestatesPlayer1 = [];
                         $scope.info.gamestatesPlayer2 = [];
                     }
                     if ($scope.info.realtimeLogs) {
+                        $scope.info.logsServer = this.deviceServer.log.traces;
                         $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
                         $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
                     } else {
+                        $scope.info.logsServer = [];
                         $scope.info.logsPlayer1 = [];
                         $scope.info.logsPlayer2 = [];
                     }

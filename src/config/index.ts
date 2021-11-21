@@ -7,7 +7,9 @@ export class NetcodeConfig {
     constructor(public name: string, public type: string) { }
 }
 export class NetworkConfig {
-    constructor(public tickMs: number, public minLatency1: number, public maxLatency1: number, public minLatency2: number, public maxLatency2: number) { }
+    constructor(public tickMs: number,
+        public minLatency1: number, public maxLatency1: number, public packetLoss1: number,
+        public minLatency2: number, public maxLatency2: number, public packetLoss2: number) { }
 }
 export class PlayerConfig {
     constructor(

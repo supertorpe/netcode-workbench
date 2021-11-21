@@ -8,8 +8,10 @@
             "tickMs": 50,
             "minLatency1": 10,
             "maxLatency1": 30,
+            "packetLoss1": 0,
             "minLatency2": 10,
-            "maxLatency2": 30
+            "maxLatency2": 30,
+            "packetLoss2": 0
         },
         "netcodes": [
             {

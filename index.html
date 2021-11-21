@@ -34,18 +34,20 @@
                 <tr>
                     <td data-label="Property">Algorithm</td>
                     <td data-label="Value">
-                        <select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm" data-ng-options="item as item.name for item in info.netcodes" data-ng-change="changeAlgorithm()">
+                        <select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm"
+                            data-ng-options="item as item.name for item in info.netcodes"
+                            data-ng-change="changeAlgorithm()" data-ng-disabled="info.btnStopEnabled">
                     </select></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Tick (ms)</td>
                     <td data-label="Value"><input id="txtTick" class="input-small" type="number" min="10" max="999" maxlength="3"
-                        data-ng-model="info.tick" /></td>
+                        data-ng-model="info.tick" data-ng-disabled="info.btnStopEnabled"/></td>
                 </tr>
                 <tr>
                     <td data-label="Property">NPCs</td>
                     <td data-label="Value"><input type="number" class="input-small" min="0" max="10" maxlength="2" id="txtNPCs"
-                        data-ng-model="info.npcs" /></td>
+                        data-ng-model="info.npcs" data-ng-disabled="info.btnStopEnabled"/></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Smoothing</td>
@@ -58,35 +60,49 @@
                         data-ng-change="changeDebugBoxes()" /></td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="center-text"><strong>Player 1 Latency</strong></td>
+                    <td colspan="2" class="center-text"><strong>Player 1 Network</strong></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Min (ms)</td>
                     <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency1" 
-                        data-ng-model="info.latency1.min" />
+                        data-ng-model="info.latency1.min" data-ng-disabled="info.btnStopEnabled"/>
                     </td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Max (ms)</td>
                     <td data-label="Value">
                     <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency1" 
-                        data-ng-model="info.latency1.max" />
+                        data-ng-model="info.latency1.max" data-ng-disabled="info.btnStopEnabled"/>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2" class="center-text"><strong>Player 2 Latency</strong></td>
+                    <td data-label="Property">Packet Loss %</td>
+                    <td data-label="Value">
+                    <input type="number" class="input-small" min="0" max="100" maxlength="3" id="txtPacketLoss1" 
+                        data-ng-model="info.packetLoss1" data-ng-disabled="info.btnStopEnabled"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="center-text"><strong>Player 2 Network</strong></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Min (ms)</td>
                     <td data-label="Value"><input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMinLatency2" 
-                        data-ng-model="info.latency2.min" />
+                        data-ng-model="info.latency2.min" data-ng-disabled="info.btnStopEnabled"/>
                     </td>
                 </tr>
                 <tr>
                     <td data-label="Property">Latency Max (ms)</td>
                     <td data-label="Value">
                     <input type="number" class="input-small" min="0" max="9999" maxlength="4" id="txtMaxLatency2" 
-                        data-ng-model="info.latency2.max" />
+                        data-ng-model="info.latency2.max" data-ng-disabled="info.btnStopEnabled"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td data-label="Property">Packet Loss %</td>
+                    <td data-label="Value">
+                    <input type="number" class="input-small" min="0" max="100" maxlength="3" id="txtPacketLoss2" 
+                        data-ng-model="info.packetLoss2" data-ng-disabled="info.btnStopEnabled"/>
                     </td>
                 </tr>
                 <tr>
@@ -105,9 +121,10 @@
             </tbody>
         </table>
         <div class="button-group">
-            <button data-ng-click="stop()" data-ng-if="info.btnStopEnabled"><i class="fas fa-stop"></i></button>
-            <button data-ng-click="play()" data-ng-if="info.btnPlayEnabled"><i class="fas fa-play"></i></button>
-            <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled"><i class="fas fa-download"></i></button>
+            <button data-ng-click="stop()" data-ng-if="info.btnStopEnabled" class="tooltip" aria-label="Stop"><i class="fas fa-stop"></i></button>
+            <button data-ng-click="play()" data-ng-if="info.btnPlayEnabled" class="tooltip" aria-label="Start"><i class="fas fa-play"></i></button>
+            <button data-ng-click="saveAll()" data-ng-if="info.btnSaveEnabled" class="tooltip" aria-label="Download"><i class="fas fa-download"></i></button>
+            <button data-ng-click="resetLayout()" class="tooltip" aria-label="Reset Layout"><i class="far fa-window-restore"></i></button>
         </div>
     </div>
     <!-- PLAYER 1 -->

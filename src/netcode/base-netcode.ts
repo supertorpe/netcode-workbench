@@ -1,5 +1,5 @@
-import { Command, GameState, GameStateMachine } from '../model';
-import { Log } from '../systems';
+import { Command, CommandMessage, GameState, GameStateMachine } from '../model';
+import { Log, NetworkInterface } from '../systems';
 import { currentTimestamp } from '../utils';
 
 export abstract class BaseNetCode {
@@ -9,10 +9,13 @@ export abstract class BaseNetCode {
     protected _tickMs: number;
     protected _currentTick: number;
 
-    constructor(protected log: Log, protected gameStateMachine: GameStateMachine) {
+    constructor(protected log: Log, protected net: NetworkInterface, protected gameStateMachine: GameStateMachine) {
         this._startTime = 0;
         this._tickMs = 50;
         this._currentTick = 0;
+        this.net.messageReceivedEmitter.addEventListener((message) => {
+            this.remoteCommandReceived((message as CommandMessage).command);
+        });
     }
 
     get tickMs(): number { return this._tickMs; }

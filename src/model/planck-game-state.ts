@@ -28,7 +28,7 @@ export class PlanckGameState extends GameState {
         let bodiesStr = '';
         this._bodies.forEach((body) => {
             if (!body.isStatic() && body.getUserData()) {
-                bodiesStr += `    P${(<PlayerConfig>body.getUserData()).id} x=${body.getPosition().x * config.physics.worldScale} y=${body.getPosition().x * config.physics.worldScale}\n`;
+                bodiesStr += `    P${(<PlayerConfig>body.getUserData()).id} x=${body.getPosition().x * config.physics.worldScale} y=${body.getPosition().y * config.physics.worldScale}\n`;
             }
         });
         return `\nGameState tick: ${this._tick}

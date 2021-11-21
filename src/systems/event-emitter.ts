@@ -16,6 +16,10 @@ export class EventEmitter<T> {
     }
   }
 
+  public removeListeners() {
+    this._listeners = [];
+  }
+
   public notify(event: T) {
     this._listeners.forEach((_listeners) => {
       _listeners(event);
