@@ -18,7 +18,7 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/netcode-workbench/assets/index.44dbeff1.js"></script>
+  <script type="module" crossorigin src="/netcode-workbench/assets/index.34ceca44.js"></script>
   <link rel="modulepreload" href="/netcode-workbench/assets/vendor.e74f4cfd.js">
   <link rel="stylesheet" href="/netcode-workbench/assets/index.06214cae.css">
   <script type="module">!function(){try{new Function("m","return import(m)")}catch(o){console.warn("vite: loading legacy build because dynamic import is unsupported, syntax error above should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}}();</script>
@@ -114,13 +114,11 @@
                 </tr>
                 <tr>
                     <td data-label="Property">Game States</td>
-                    <td data-label="Value"><input id="cbGameStates" type="checkbox" data-ng-model="info.realtimeGameStates"
-                        data-ng-change="checkRealtimeInfo()" /></td>
+                    <td data-label="Value"><input id="cbGameStates" type="checkbox" data-ng-model="info.realtimeGameStates"/></td>
                 </tr>
                 <tr>
                     <td data-label="Property">Logs</td>
-                    <td data-label="Value"><input id="cbLogs" type="checkbox" data-ng-model="info.realtimeLogs"
-                        data-ng-change="checkRealtimeInfo()" /></td>
+                    <td data-label="Value"><input id="cbLogs" type="checkbox" data-ng-model="info.realtimeLogs"/></td>
                 </tr>
             </tbody>
         </table>
@@ -133,14 +131,25 @@
     </div>
     <!-- PLAYER 1 -->
     <div id="player1GameStates" class="gameState">
-        <div class="card" data-ng-repeat="item in info.gamestatesPlayer1">
+        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer1 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
-                <div class="small-text" data-ng-repeat="player in item.players">P{{::player.id}} [{{::player.x}} ,
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
                     {{::player.y}}]</div>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands">P{{::command.playerId}}:{{::command.value}}
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
+                </span>
+            </div>
+        </div>
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer1[0]] track by item.tick">
+            <div class="section">Tick: {{::item.tick}}</div>
+            <div class="section">
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
+                    {{::player.y}}]</div>
+            </div>
+            <div class="section">
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
                 </span>
             </div>
         </div>
@@ -150,20 +159,34 @@
         <canvas id="player1GameArea" class="gameArea" width="300px" height="250px"></canvas>
     </div>
     <div id="player1Logs">
-        <p data-ng-repeat="trace in info.logsPlayer1" class="logs"
+        <p data-ng-if="!info.playing" data-ng-repeat="trace in info.logsPlayer1 track by trace.id" class="logs"
+            data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
+            {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
+        <p data-ng-if="info.playing && info.realtimeLogs" data-ng-repeat="trace in [info.logsPlayer1[0]] track by trace.id" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
     <!-- PLAYER 2 -->
     <div id="player2GameStates" class="gameState">
-        <div class="card" data-ng-repeat="item in info.gamestatesPlayer2">
+        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer2 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
-                <div class="small-text" data-ng-repeat="player in item.players">P{{::player.id}} [{{::player.x}} ,
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
                     {{::player.y}}]</div>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands">P{{::command.playerId}}:{{::command.value}}
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
+                </span>
+            </div>
+        </div>
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer2[0]] track by item.tick">
+            <div class="section">Tick: {{::item.tick}}</div>
+            <div class="section">
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
+                    {{::player.y}}]</div>
+            </div>
+            <div class="section">
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
                 </span>
             </div>
         </div>
@@ -174,20 +197,34 @@
         <canvas id="player2GameArea" class="gameArea" width="300px" height="250px"></canvas>
     </div>
     <div id="player2Logs">
-        <p data-ng-repeat="trace in info.logsPlayer2" class="logs"
+        <p data-ng-if="!info.playing" data-ng-repeat="trace in info.logsPlayer2 track by trace.id" class="logs"
+            data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
+            {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
+        <p data-ng-if="info.playing && info.realtimeLogs" data-ng-repeat="trace in [info.logsPlayer2[0]] track by trace.id" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
     <!-- SERVER -->
     <div id="serverGameStates" class="gameState">
-        <div class="card" data-ng-repeat="item in info.gamestatesServer">
+        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesServer track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
-                <div class="small-text" data-ng-repeat="player in item.players">P{{::player.id}} [{{::player.x}} ,
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
                     {{::player.y}}]</div>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands">P{{::command.playerId}}:{{::command.value}}
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
+                </span>
+            </div>
+        </div>
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesServer[0]] track by item.tick">
+            <div class="section">Tick: {{::item.tick}}</div>
+            <div class="section">
+                <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
+                    {{::player.y}}]</div>
+            </div>
+            <div class="section">
+                Commands: <span data-ng-repeat="command in item.commands track by command.playerId">P{{::command.playerId}}:{{::command.value}}
                 </span>
             </div>
         </div>
@@ -196,14 +233,17 @@
         <canvas id="serverGameArea" class="gameArea" width="300px" height="250px"></canvas>
     </div>
     <div id="serverLogs">
-        <p data-ng-repeat="trace in info.logsServer" class="logs"
+        <p data-ng-if="!info.playing" data-ng-repeat="trace in info.logsServer track by trace.id" class="logs"
+            data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
+            {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
+        <p data-ng-if="info.playing && info.realtimeLogs" data-ng-repeat="trace in [info.logsServer[0]] track by trace.id" class="logs"
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
     
   <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
   <script nomodule id="vite-legacy-polyfill" src="/netcode-workbench/assets/polyfills-legacy.41aa91c2.js"></script>
-  <script nomodule id="vite-legacy-entry" data-src="/netcode-workbench/assets/index-legacy.1dbcf0f5.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+  <script nomodule id="vite-legacy-entry" data-src="/netcode-workbench/assets/index-legacy.2624233b.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
 </body>
 
 </html>
