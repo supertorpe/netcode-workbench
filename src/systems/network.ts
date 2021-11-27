@@ -10,6 +10,7 @@ export class NetworkInterface {
     private _messageSentEmitter: EventEmitter<Message> = new EventEmitter<Message>();
     private _messageReceivedEmitter: EventEmitter<Message> = new EventEmitter<Message>();
 
+    get connectionCount(): number { return this.connections.length; }
     get connectionEmitter(): EventEmitter<NetworkConn> { return this._connectionEmitter; }
     get disconnectionEmitter(): EventEmitter<NetworkConn> { return this._disconnectionEmitter; }
     get messageSentEmitter(): EventEmitter<Message> { return this._messageSentEmitter; }

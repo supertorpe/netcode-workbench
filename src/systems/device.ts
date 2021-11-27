@@ -2,13 +2,13 @@ import { config, NetcodeConfig } from '../config';
 import { NetworkConn, NetworkInterface } from './network';
 import { Log } from './log';
 import { EventEmitter } from './event-emitter';
-
-import { PlanckGameState, GameStateLog } from '../model';
+import { PlanckGameState, GameStateLog, GameStateMachine, DummyGameStateMachine, GameState } from '../model';
 import { BaseNetCode, NetCodeFactory } from '../netcode';
 import * as planck from 'planck-js';
 import { PlanckRenderer } from './planck-renderer';
 import { Renderer } from './renderer';
 import { PlanckGameStateMachine } from './planck-gamestate-machine';
+import { SimpleRenderer } from './simple-renderer';
 
 export class Device {
 
@@ -18,7 +18,7 @@ export class Device {
     protected _networkInterface: NetworkInterface;
     protected _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     protected netcode!: BaseNetCode;
-    protected gameStateMachine!: PlanckGameStateMachine;
+    protected gameStateMachine!: GameStateMachine;
     protected renderer!: Renderer;
     protected _npcs: number = 0;
     protected _interpolation: boolean = true;
@@ -64,10 +64,15 @@ export class Device {
         algorithm: NetcodeConfig,
         tickMs: number,
         npcs: number,
+        usePlanck: boolean, 
         interpolation: boolean,
         debugBoxes: boolean) {
         // gameStateMachine
-        this.gameStateMachine = new PlanckGameStateMachine(this._log, tickMs / 1000);
+        this.gameStateMachine = (
+            usePlanck ?
+            new PlanckGameStateMachine(this._log, tickMs / 1000) :
+            new DummyGameStateMachine()
+        );
         // initialize netcode
         let algorithmName = algorithm.name + (algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
         const netcode = NetCodeFactory.build(algorithmName, this._log, this._networkInterface, this.gameStateMachine);
@@ -77,15 +82,20 @@ export class Device {
         this._npcs = npcs;
         // interpolation
         this._interpolation = interpolation;
-        // initialize physics world
-        const world = this.createWorld();
-        //  initialize game state
-        const initialGameState = new PlanckGameState(0, world);
-        initialGameState.peerCount = 2;
+        // initialize physics world & initialGameState
         this.netcode.tickMs = tickMs;
-        this.netcode.start(initialGameState);
+        let initialGameState : GameState;
+        if (usePlanck) {
+            const world = this.createPlanckWorld();
+            initialGameState = new PlanckGameState(0, world);
+            this.netcode.start(initialGameState);
+        } else {
+            this.netcode.start();
+        }
         // initialize renderer
-        this.renderer = new PlanckRenderer(this.log, this.canvas, this.netcode);
+        this.renderer = usePlanck ?
+            new PlanckRenderer(this.log, this.canvas, this.netcode) :
+            new SimpleRenderer(this.log, this.canvas, this.netcode);
         this.renderer.debugBoxes = debugBoxes;
         // start gameloop
         this.running = true;
@@ -104,7 +114,7 @@ export class Device {
         return result;
     }
 
-    private createStaticBody(world: planck.World, x: number, y: number, width: number, height: number) {
+    private createPlanckStaticBody(world: planck.World, x: number, y: number, width: number, height: number) {
         const body = world.createBody({ type: "static" });
         body.setUserData({
             width: width,
@@ -122,18 +132,18 @@ export class Device {
         );
     }
 
-    private createWorld(): planck.World {
+    private createPlanckWorld(): planck.World {
         const gravity = planck.Vec2(0, 0);
         const world = planck.World(gravity);
         // borders
         // - top
-        this.createStaticBody(world, 0, 0, this.canvas.width, config.physics.borderThickness);
+        this.createPlanckStaticBody(world, 0, 0, this.canvas.width, config.physics.borderThickness);
         // - bottom
-        this.createStaticBody(world, 0, this.canvas.height - config.physics.borderThickness, this.canvas.width, config.physics.borderThickness);
+        this.createPlanckStaticBody(world, 0, this.canvas.height - config.physics.borderThickness, this.canvas.width, config.physics.borderThickness);
         // - left
-        this.createStaticBody(world, 0, 0, config.physics.borderThickness, this.canvas.height);
+        this.createPlanckStaticBody(world, 0, 0, config.physics.borderThickness, this.canvas.height);
         // - right
-        this.createStaticBody(world, this.canvas.width - config.physics.borderThickness, 0, config.physics.borderThickness, this.canvas.height);
+        this.createPlanckStaticBody(world, this.canvas.width - config.physics.borderThickness, 0, config.physics.borderThickness, this.canvas.height);
         // players
         const playerFD = {
             density: 0.0,
@@ -165,8 +175,8 @@ export class Device {
             const bodyNpc = world.createBody({
                 type: "dynamic",
                 position: planck.Vec2(
-                    (35 + (i * size) + size / 2) / config.physics.worldScale,
-                    (35 + (i * size) + size / 2) / config.physics.worldScale
+                    (35 + (i * size) + size / 2 + (10 - this._npcs) * 8) / config.physics.worldScale,
+                    (35 + (i * size) + size / 2 + (10 - this._npcs) * 8) / config.physics.worldScale
                 ),
                 allowSleep: false,
                 awake: true
@@ -178,7 +188,7 @@ export class Device {
             bodyNpc.setUserData({
                 id: 100 + i,
                 size: size,
-                color: 'black'
+                color: config.npc.color
             });
         };
         return world;

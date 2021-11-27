@@ -3,10 +3,11 @@
 [Netcode Workbench](https://supertorpe.github.io/netcode-workbench/) is a graphical console for debugging netcode algorithms.
 
 ## Features
+- Two players with up to ten NPCs
 - Network abstraction with latency and packet loss simulation
 - Configurable tick duration
-- Parametrizable interpolation
-- Optionally draw debug boxes to see interpolation effect
+- Parametrizable smoothing (interpolation/extrapolation)
+- Optionally draw debug boxes to see smoothing effect
 - Realtime and downloadable logs and game state history
 - Easily extensible inheriting from the BaseNetCode class
 - Simple game simulation with planck-js physics engine
@@ -17,9 +18,9 @@
 ### Available NetCodes
 #### P2P
 - p2p-naive: it only keeps one Game State in memory. 'Naive' sends and receives commands on every tick. If there are remote commands pending (due to lag), it waits before generating next Game State: latency affects it a lot. This doesn't allow real interpolation: the position of each body can be calculated from the time elapsed since the tick and the position and velocity of the body. When latency or tick period is high, this calculation gives wrong results (as it ignores collisions)
-- p2p-stibbons: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better.
+- p2p-delayed: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better by delaying the render frame
 #### Client-Server
-
+- cs-lockstep: The server advances the tick when the time comes but only if it has received the commands from all the clients. The server calculates the physics and sends the game state to the clients
 ## Screenshot
 <img src="https://supertorpe.github.io/netcode-workbench/assets/screenshot.png" />
 

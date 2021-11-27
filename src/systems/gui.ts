@@ -224,6 +224,16 @@ class Gui {
         this.panelCanvasS.front();
     }
 
+    private saveFile(name: string, content: string) {
+        const date = new Date();
+        const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${name}.log`);
+        const writer = fileStream.getWriter();
+        const encoder = new TextEncoder();
+        const uint8array = encoder.encode(content);
+        writer.write(uint8array);
+        writer.close();
+    }
+
     private bootstrapAngular() {
         angular.module('app', [])
             .controller('mainCtrl', ['$scope', ($scope) => {
@@ -231,6 +241,7 @@ class Gui {
                     btnStopEnabled: false,
                     btnPlayEnabled: true,
                     btnSaveEnabled: true,
+                    playing: false,
                     tick: config.network.tickMs,
                     netcodes: config.netcodes,
                     algorithm: config.netcodes[0],
@@ -245,12 +256,16 @@ class Gui {
                     debugBoxes: true,
                     syncScrollGs1: true,
                     syncScrollGs2: true,
+                    syncScrollGsS: true,
                     syncScrollLog1: true,
                     syncScrollLog2: true,
+                    syncScrollLogS: true,
                     logsPlayer1: [],
                     logsPlayer2: [],
+                    logsServer: [],
                     gamestatesPlayer1: [],
-                    gamestatesPlayer2: []
+                    gamestatesPlayer2: [],
+                    gamestatesServer: []
                 };
 
                 const p2pmode = $scope.info.algorithm.type === 'p2p';
@@ -262,23 +277,45 @@ class Gui {
                 // sync scrolls
                 const player1GameStates = document.getElementById('player1GameStates') as HTMLElement;
                 const player2GameStates = document.getElementById('player2GameStates') as HTMLElement;
+                const serverGameStates = document.getElementById('serverGameStates') as HTMLElement;
                 angular.element(player1GameStates.parentElement as HTMLElement).bind('scroll', () => {
-                    if ($scope.info.syncScrollGs1)
-                        (player2GameStates.parentElement as HTMLElement).scrollTop = (player1GameStates.parentElement as HTMLElement).scrollTop;
+                    if ($scope.info.syncScrollGs1) {
+                        if ($scope.info.syncScrollGs2) (player2GameStates.parentElement as HTMLElement).scrollTop = (player1GameStates.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollGsS) (serverGameStates.parentElement as HTMLElement).scrollTop = (player1GameStates.parentElement as HTMLElement).scrollTop;
+                    }
                 });
                 angular.element(player2GameStates.parentElement as HTMLElement).bind('scroll', () => {
-                    if ($scope.info.syncScrollGs2)
-                        (player1GameStates.parentElement as HTMLElement).scrollTop = (player2GameStates.parentElement as HTMLElement).scrollTop;
+                    if ($scope.info.syncScrollGs2) {
+                        if ($scope.info.syncScrollGs1) (player1GameStates.parentElement as HTMLElement).scrollTop = (player2GameStates.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollGsS) (serverGameStates.parentElement as HTMLElement).scrollTop = (player2GameStates.parentElement as HTMLElement).scrollTop;
+                    }
+                });
+                angular.element(serverGameStates.parentElement as HTMLElement).bind('scroll', () => {
+                    if ($scope.info.syncScrollGsS) {
+                        if ($scope.info.syncScrollGs1) (player1GameStates.parentElement as HTMLElement).scrollTop = (serverGameStates.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollGs2) (player2GameStates.parentElement as HTMLElement).scrollTop = (serverGameStates.parentElement as HTMLElement).scrollTop;
+                    }
                 });
                 const player1Logs = document.getElementById('player1Logs') as HTMLElement;
                 const player2Logs = document.getElementById('player2Logs') as HTMLElement;
+                const serverLogs = document.getElementById('serverLogs') as HTMLElement;
                 angular.element(player1Logs.parentElement as HTMLElement).bind('scroll', () => {
-                    if ($scope.info.syncScrollLog1)
-                        (player2Logs.parentElement as HTMLElement).scrollTop = (player1Logs.parentElement as HTMLElement).scrollTop;
+                    if ($scope.info.syncScrollLog1) {
+                        if ($scope.info.syncScrollLog2) (player2Logs.parentElement as HTMLElement).scrollTop = (player1Logs.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollLogS) (serverLogs.parentElement as HTMLElement).scrollTop = (player1Logs.parentElement as HTMLElement).scrollTop;
+                    }  
                 });
                 angular.element(player2Logs.parentElement as HTMLElement).bind('scroll', () => {
-                    if ($scope.info.syncScrollLog2)
-                        (player1Logs.parentElement as HTMLElement).scrollTop = (player2Logs.parentElement as HTMLElement).scrollTop;
+                    if ($scope.info.syncScrollLog2) {
+                        if ($scope.info.syncScrollLog1) (player1Logs.parentElement as HTMLElement).scrollTop = (player2Logs.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollLogS) (serverLogs.parentElement as HTMLElement).scrollTop = (player2Logs.parentElement as HTMLElement).scrollTop;
+                    }  
+                });
+                angular.element(serverLogs.parentElement as HTMLElement).bind('scroll', () => {
+                    if ($scope.info.syncScrollLogS) {
+                        if ($scope.info.syncScrollLog1) (player1Logs.parentElement as HTMLElement).scrollTop = (serverLogs.parentElement as HTMLElement).scrollTop;
+                        if ($scope.info.syncScrollLog2) (player2Logs.parentElement as HTMLElement).scrollTop = (serverLogs.parentElement as HTMLElement).scrollTop;
+                    }  
                 });
 
                 this.deviceServer.deviceUpdatedEmitter.addEventListener(() => {
@@ -317,7 +354,7 @@ class Gui {
                     name: 'sync',
                     position: 1,
                     handler: () => {
-                        $scope.info.syncScrollGs2 = !$scope.info.syncScrollGS2;
+                        $scope.info.syncScrollGs2 = !$scope.info.syncScrollGs2;
                     }
                 });
                 this.panelGamestates2.addControl({
@@ -326,6 +363,22 @@ class Gui {
                     position: 2,
                     handler: () => {
                         $scope.saveGamestates2();
+                    }
+                });
+                this.panelGamestatesS.addControl({
+                    html: syncButtonHtml,
+                    name: 'sync',
+                    position: 1,
+                    handler: () => {
+                        $scope.info.syncScrollGsS = !$scope.info.syncScrollGsS;
+                    }
+                });
+                this.panelGamestatesS.addControl({
+                    html: downloadButtonHtml,
+                    name: 'download',
+                    position: 2,
+                    handler: () => {
+                        $scope.saveGamestatesS();
                     }
                 });
                 this.panelLog1.addControl({
@@ -360,6 +413,22 @@ class Gui {
                         $scope.saveLogs2();
                     }
                 });
+                this.panelLogS.addControl({
+                    html: syncButtonHtml,
+                    name: 'sync',
+                    position: 1,
+                    handler: () => {
+                        $scope.info.syncScrollLogS = !$scope.info.syncScrollLogS;
+                    }
+                });
+                this.panelLogS.addControl({
+                    html: downloadButtonHtml,
+                    name: 'download',
+                    position: 2,
+                    handler: () => {
+                        $scope.saveLogsS();
+                    }
+                });
 
                 $scope.changeAlgorithm = () => {
                     const p2pmode = $scope.info.algorithm.type === 'p2p';
@@ -374,16 +443,7 @@ class Gui {
                     this.devicePlayer2.stop();
                     $scope.info.btnStopEnabled = false;
                     $scope.info.btnPlayEnabled = true;
-                    if (!$scope.info.realtimeGameStates) {
-                        $scope.info.gamestatesServer = this.deviceServer.gameStateHistory;
-                        $scope.info.gamestatesPlayer1 = this.devicePlayer1.gameStateHistory;
-                        $scope.info.gamestatesPlayer2 = this.devicePlayer2.gameStateHistory;
-                    }
-                    if (!$scope.info.realtimeLogs) {
-                        $scope.info.logsServer = this.deviceServer.log.traces;
-                        $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
-                        $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
-                    }
+                    $scope.info.playing = false;
                 };
                 $scope.play = () => {
                     // cleanup
@@ -392,38 +452,24 @@ class Gui {
                     this.devicePlayer2.reset();
                     if ($scope.info.algorithm.type === 'p2p') {
                         this.devicePlayer1.connect(this.devicePlayer2, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
-                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                     } else {
                         this.devicePlayer1.connect(this.deviceServer, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
                         this.devicePlayer2.connect(this.deviceServer, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.deviceServer.play($scope.info.algorithm, $scope.info.tick,$scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes)
-                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
-                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.deviceServer.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, false, false);
+                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
                     }
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
-                    $scope.checkRealtimeInfo();
-                };
-                $scope.checkRealtimeInfo = () => {
-                    if ($scope.info.realtimeGameStates) {
-                        $scope.info.gamestatesServer = this.deviceServer.gameStateHistory;
-                        $scope.info.gamestatesPlayer1 = this.devicePlayer1.gameStateHistory;
-                        $scope.info.gamestatesPlayer2 = this.devicePlayer2.gameStateHistory;
-                    } else {
-                        $scope.info.gamestatesServer = [];
-                        $scope.info.gamestatesPlayer1 = [];
-                        $scope.info.gamestatesPlayer2 = [];
-                    }
-                    if ($scope.info.realtimeLogs) {
-                        $scope.info.logsServer = this.deviceServer.log.traces;
-                        $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
-                        $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
-                    } else {
-                        $scope.info.logsServer = [];
-                        $scope.info.logsPlayer1 = [];
-                        $scope.info.logsPlayer2 = [];
-                    }
+                    $scope.info.playing = true;
+                    $scope.info.gamestatesServer = this.deviceServer.gameStateHistory;
+                    $scope.info.gamestatesPlayer1 = this.devicePlayer1.gameStateHistory;
+                    $scope.info.gamestatesPlayer2 = this.devicePlayer2.gameStateHistory;
+                    $scope.info.logsServer = this.deviceServer.log.traces;
+                    $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
+                    $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
                 };
                 $scope.changeInterpolation = () => {
                     this.devicePlayer1.interpolation = $scope.info.interpolation;
@@ -434,12 +480,8 @@ class Gui {
                     this.devicePlayer2.debugBoxes = $scope.info.debugBoxes;
                 };
                 $scope.saveAll = () => {
-                    const date = new Date();
-
-                    const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}.log`);
-                    const writer = fileStream.getWriter();
-                    const encoder = new TextEncoder();
-                    const data = `--------------------
+                    let data = `
+--------------------
 PLAYER 1 GAME STATES
 --------------------
 ${this.devicePlayer1.gameStateHistoryLog()}
@@ -456,48 +498,38 @@ ${this.devicePlayer2.gameStateHistoryLog()}
 PLAYER 2 LOGS
 -------------
 ${this.devicePlayer2.log}`;
-                    const uint8array = encoder.encode(data);
-                    writer.write(uint8array);
-                    writer.close();
+                    if ($scope.info.algorithm.type !== 'p2p') {
+                        data +=
+`-----------------
+SERVER GAME STATES
+------------------
+${this.deviceServer.gameStateHistoryLog()}
+-----------
+SERVER LOGS
+-----------
+${this.deviceServer.log}`;
+                    }
+                    this.saveFile($scope.info.algorithm.name, data);
                 };
 
                 $scope.saveGamestates1 = () => {
-                    const date = new Date();
-                    const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}-p1states.log`);
-                    const writer = fileStream.getWriter();
-                    const encoder = new TextEncoder();
-                    const uint8array = encoder.encode(this.devicePlayer1.gameStateHistoryLog());
-                    writer.write(uint8array);
-                    writer.close();
+                    this.saveFile(`${$scope.info.algorithm.name}-p1-states`, this.devicePlayer1.gameStateHistoryLog());
                 };
                 $scope.saveLogs1 = () => {
-                    const date = new Date();
-                    const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}-p1logs.log`);
-                    const writer = fileStream.getWriter();
-                    const encoder = new TextEncoder();
-                    const uint8array = encoder.encode(this.devicePlayer1.log.toString());
-                    writer.write(uint8array);
-                    writer.close();
+                    this.saveFile(`${$scope.info.algorithm.name}-p1-logs`, this.devicePlayer1.log.toString());
                 };
                 $scope.saveGamestates2 = () => {
-                    const date = new Date();
-                    const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}-p2states.log`);
-                    const writer = fileStream.getWriter();
-                    const encoder = new TextEncoder();
-                    const uint8array = encoder.encode(this.devicePlayer2.gameStateHistoryLog());
-                    writer.write(uint8array);
-                    writer.close();
+                    this.saveFile(`${$scope.info.algorithm.name}-p2-states`, this.devicePlayer2.gameStateHistoryLog());
                 };
                 $scope.saveLogs2 = () => {
-                    const date = new Date();
-                    const fileStream = createWriteStream(`${date.getFullYear()}${date.getMonth()}${date.getDate()}${date.getHours()}${date.getMinutes()}${date.getSeconds()}-${$scope.info.algorithm}-p2logs.log`);
-                    const writer = fileStream.getWriter();
-                    const encoder = new TextEncoder();
-                    const uint8array = encoder.encode(this.devicePlayer2.log.toString());
-                    writer.write(uint8array);
-                    writer.close();
+                    this.saveFile(`${$scope.info.algorithm.name}-p2-logs`, this.devicePlayer2.log.toString());
                 };
-
+                $scope.saveGamestatesS = () => {
+                    this.saveFile(`${$scope.info.algorithm.name}-srv-states`, this.deviceServer.gameStateHistoryLog());
+                };
+                $scope.saveLogsS = () => {
+                    this.saveFile(`${$scope.info.algorithm.name}-srv-logs`, this.deviceServer.log.toString());
+                };
             }]);
     }
 }

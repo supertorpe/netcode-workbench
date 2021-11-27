@@ -1,4 +1,4 @@
-import { Command, CommandMessage, GameState, GameStateMachine } from '../model';
+import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage } from '../model';
 import { Log, NetworkInterface } from '../systems';
 import { currentTimestamp } from '../utils';
 
@@ -14,7 +14,12 @@ export abstract class BaseNetCode {
         this._tickMs = 50;
         this._currentTick = 0;
         this.net.messageReceivedEmitter.addEventListener((message) => {
-            this.remoteCommandReceived((message as CommandMessage).command);
+            if (message instanceof CommandMessage)
+                this.remoteCommandReceived((message as CommandMessage).command);
+            else if (message instanceof GameStateMessage)
+                this.gameStateReceived((message as GameStateMessage).gameState);
+            else
+                this.log.logError(`Unknown message received: ${message}`);
         });
     }
 
@@ -22,10 +27,10 @@ export abstract class BaseNetCode {
     set tickMs(value: number) { this._tickMs = value; }
     get currentTick(): number { return this._currentTick; }
 
-    public start(initialGameState: GameState): number {
+    public start(initialGameState?: GameState): number {
         this._startTime = currentTimestamp();
         this._currentTick = 0;
-        this._initialGameState = initialGameState;
+        if (initialGameState) this._initialGameState = initialGameState;
         return this._startTime;
     }
 
@@ -37,8 +42,9 @@ export abstract class BaseNetCode {
         return this._startTime + (tick * this.tickMs);
     }
 
-    public abstract localCommandReceived(playerId: number, commandValue: number): Command | undefined;
+    public abstract localCommandReceived(playerId: number, commandValue: number): void;
     public abstract remoteCommandReceived(command: Command): void;
+    public abstract gameStateReceived(gameState: GameState): void;
     public abstract getGameStateToRender(): GameState;
     public abstract getGameState(tick: number): GameState | null;
     public abstract tick(): void;

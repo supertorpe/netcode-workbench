@@ -1,4 +1,4 @@
-import { Command, GameState, GameStateLog } from '../../model';
+import { Command, CommandMessage, GameState, GameStateLog } from '../../model';
 import { BaseNetCode } from '../base-netcode';
 
 /*
@@ -38,8 +38,8 @@ export class P2PNaiveNetCode extends BaseNetCode {
         }
       }
       // check if there aren't commands left
-      if (this._initialGameState.commands.length < this._initialGameState.peerCount) {
-        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._initialGameState.commands.length} of ${this._initialGameState.peerCount}`);
+      if (this._initialGameState.commands.length < this.net.connectionCount) {
+        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._initialGameState.commands.length} of ${this.net.connectionCount}`);
       } else {
         this._initialGameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
         this.log.logInfo(this._initialGameState.toString());
@@ -56,19 +56,22 @@ export class P2PNaiveNetCode extends BaseNetCode {
     return result;
   }
 
-  localCommandReceived(playerId: number, commandValue: number): Command | undefined {
-    let result;
+  localCommandReceived(playerId: number, commandValue: number) {
     if (!this.localCommand) {
-      result = new Command(this._currentTick, playerId, commandValue);
-      this.log.logInfo(`local command: ${result.toFullString()}`);
-      this.localCommand = result;
+      const command = new Command(this._currentTick, playerId, commandValue);
+      this.localCommand = command;
+      this.log.logInfo(`sending local command: ${command.toFullString()}`);
+      this.net.broadcast(new CommandMessage(command));
     }
-    return result;
   }
 
   public remoteCommandReceived(command: Command): void {
     this.log.logInfo(`received command: ${command.toFullString()}`);
     this.remoteCommands.push(command);
+  }
+
+  public gameStateReceived(_gameState: GameState): void {
+    throw new Error('P2PNaiveNetCode: Method not implemented.');
   }
 
   public getGameStateToRender(): GameState {

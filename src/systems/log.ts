@@ -7,7 +7,12 @@ export enum LogLevel {
 }
 
 export class Trace {
-    constructor(public level: LogLevel, public timestamp: number, public text: string) { }
+    private static idCounter = 0;
+    private _id;
+    constructor(public level: LogLevel, public timestamp: number, public text: string) {
+        this._id = Trace.idCounter++;
+    }
+    get id(): number { return this._id; }
     public toString(): string {
         const date = new Date();
         date.setTime(this.timestamp);

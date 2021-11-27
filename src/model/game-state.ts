@@ -27,7 +27,6 @@ export class GameStateLog {
 export abstract class GameState {
     
     protected _tick: number;
-    protected _peerCount!: number;
     protected _commands: Command[];
 
     constructor(tick: number) {
@@ -36,8 +35,6 @@ export abstract class GameState {
     }
 
     get tick(): number { return this._tick; }
-    get peerCount(): number { return this._peerCount; }
-    set peerCount(value: number) { this._peerCount = value; }
     get commands(): Command[] { return this._commands; }
 
     public incTick() {
@@ -60,4 +57,8 @@ export abstract class GameState {
 
 export interface GameStateMachine {
     compute(gameState: GameState): void;
+}
+
+export class DummyGameStateMachine implements GameStateMachine {
+    compute(_gameState: GameState) { }
 }

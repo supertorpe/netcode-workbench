@@ -19,7 +19,7 @@
                 "type": "p2p"
             },
             {
-                "name": "p2p-stibbons",
+                "name": "p2p-delayed",
                 "type": "p2p"
             },
             {
@@ -51,6 +51,12 @@
                 "keyRight": 39
             }
         ],
+        "npc" : {
+            "color": "black"
+        },
+        "border": {
+            "color": "#708090"
+        },
         "physics": {
             "worldScale": 30,
             "strength": 10,

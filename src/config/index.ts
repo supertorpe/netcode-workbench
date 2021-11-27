@@ -17,6 +17,12 @@ export class PlayerConfig {
         public x: number, public y: number, public size: number,
         public keyUp: number, public keyDown: number, public keyLeft: number, public keyRight: number) { }
 }
+export class NpcConfig {
+    constructor(public color: string) { }
+}
+export class BorderConfig {
+    constructor(public color: string) { }
+}
 export class PhysicsConfig {
     constructor(public worldScale: number, public strength: number, public borderThickness: number) { }
 }
@@ -26,6 +32,8 @@ export class Config {
         public netcodes: NetcodeConfig[],
         public network: NetworkConfig,
         public players: PlayerConfig[],
+        public npc: NpcConfig,
+        public border: BorderConfig,
         public physics: PhysicsConfig
     ) { }
 }

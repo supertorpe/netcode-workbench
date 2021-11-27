@@ -2,6 +2,7 @@ import * as planck from 'planck-js';
 import * as Serializer from 'planck-js/lib/serializer';
 import { config, PlayerConfig } from '../config';
 import { CommandLog, GameState, GameStateLog, PlayerLog } from './game-state';
+import { SimpleBodyState, SimpleGameState } from './simple-game-state';
 
 export class PlanckGameState extends GameState {
 
@@ -77,6 +78,34 @@ ${bodiesStr}  commands:
         });
         commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
         return new GameStateLog(this._tick, players, commands);
+    }
+
+    public buildSimpleGameState() : SimpleGameState {
+        const bodies: SimpleBodyState[] = [];
+        this._bodies.forEach((body) => {
+            if (!body.isStatic()) {
+                let playerConfig = <PlayerConfig>body.getUserData();
+                const simpleBody = new SimpleBodyState(
+                    playerConfig.id, false,
+                    body.getPosition().x, body.getPosition().y,
+                    body.getLinearVelocity().x, body.getLinearVelocity().y,
+                    playerConfig.size,
+                    playerConfig.size,
+                    playerConfig.color);
+                bodies.push(simpleBody);
+            }
+            if (body.isStatic()) {
+                const simpleBody = new SimpleBodyState(
+                    -1, true,
+                    body.getPosition().x, body.getPosition().y,
+                    body.getLinearVelocity().x, body.getLinearVelocity().y,
+                    (<any>body.getUserData()).width,
+                    (<any>body.getUserData()).height,
+                    config.border.color);
+                bodies.push(simpleBody);
+            }
+        });
+        return new SimpleGameState(this.tick, bodies);
     }
 }
 

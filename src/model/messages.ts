@@ -1,4 +1,5 @@
 import { Command } from "./command";
+import { GameState } from "./game-state";
 
 export class Message {
     private _timestampOrigin!: number;
@@ -22,5 +23,18 @@ export class CommandMessage extends Message {
     }
 
     get command(): Command { return this._command; }
+
+}
+
+export class GameStateMessage extends Message {
+
+    private _gameState: GameState;
+
+    constructor(gameState: GameState, origin?: number, destination?: number) {
+        super(gameState.tick, origin, destination);
+        this._gameState = gameState;
+    }
+
+    get gameState(): GameState { return this._gameState; }
 
 }

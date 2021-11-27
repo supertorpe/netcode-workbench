@@ -2,9 +2,20 @@ import { config } from '../config';
 import { CommandLog, GameState, GameStateLog, PlayerLog } from './game-state';
 
 export class SimpleBodyState {
-    constructor(public id: number, public posX: number, public posY: number) { }
+    constructor(
+        public id: number, public isStatic: boolean,
+        public posX: number, public posY: number,
+        public velX: number, public velY: number,
+        public width: number, public height: number,
+        public color: string) { }
+    
     public clone() : SimpleBodyState {
-        return new SimpleBodyState(this.id, this.posX, this.posY);
+        return new SimpleBodyState(
+            this.id, this.isStatic,
+            this.posX, this.posY,
+            this.velX, this.velY,
+            this.width, this.height,
+            this.color);
     }
 }
 
@@ -26,7 +37,8 @@ export class SimpleGameState extends GameState {
     public toString(): string {
         let bodiesStr = '';
         this._bodies.forEach((body) => {
-            bodiesStr += `    P${body.id} x=${body.posX * config.physics.worldScale} y=${body.posY * config.physics.worldScale}\n`;
+            if (!body.isStatic)
+                bodiesStr += `    P${body.id} x=${body.posX * config.physics.worldScale} y=${body.posY * config.physics.worldScale}\n`;
         });
         return `\nGameState tick: ${this._tick}
   bodies:
@@ -45,7 +57,8 @@ ${bodiesStr}  commands:
     public toLog(): GameStateLog {
         const players: PlayerLog[] = [];
         this._bodies.forEach((body) => {
-            players.push(new PlayerLog(body.id, body.posX * config.physics.worldScale, body.posY * config.physics.worldScale));
+            if (!body.isStatic)
+                players.push(new PlayerLog(body.id, body.posX * config.physics.worldScale, body.posY * config.physics.worldScale));
         });
         players.sort((a, b) => a.id > b.id ? 1 : -1);
         const commands: CommandLog[] = [];

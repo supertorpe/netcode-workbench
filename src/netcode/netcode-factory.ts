@@ -4,7 +4,7 @@ import { BaseNetCode } from './base-netcode';
 import { CSLockstepClientNetCode } from './client-server/cs-lockstep-client-netcode';
 import { CSLockstepServerNetCode } from './client-server/cs-lockstep-server-netcode';
 import { P2PNaiveNetCode } from './p2p/p2p-naive-netcode';
-import { P2PStibbonsNetCode } from './p2p/p2p-stibbons-netcode';
+import { P2PDelayedNetCode } from './p2p/p2p-delayed-netcode';
 
 export class NetCodeFactory {
     constructor() { }
@@ -13,9 +13,9 @@ export class NetCodeFactory {
             case 'p2p-naive':
                 log.logInfo('Using p2p-naive netcode');
                 return new P2PNaiveNetCode(log, net, gameStateMachine);
-            case 'p2p-stibbons':
-                log.logInfo('Using p2p-stibbons netcode');
-                return new P2PStibbonsNetCode(log, net, gameStateMachine);
+            case 'p2p-delayed':
+                log.logInfo('Using p2p-delayed netcode');
+                return new P2PDelayedNetCode(log, net, gameStateMachine);
             case 'cs-lockstep-client':
                 log.logInfo('Using cs-lockstep-client netcode');
                 return new CSLockstepClientNetCode(log, net, gameStateMachine);
