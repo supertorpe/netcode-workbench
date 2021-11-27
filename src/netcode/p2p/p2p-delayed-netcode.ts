@@ -40,8 +40,8 @@ export class P2PDelayedNetCode extends BaseNetCode {
         }
       }
       // check if there aren't commands left
-      if (this._initialGameState.commands.length < this.net.connectionCount) {
-        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._initialGameState.commands.length} of ${this.net.connectionCount}`);
+      if (this._initialGameState.commands.length < this.net.connectionCount + 1) {
+        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._initialGameState.commands.length} of ${this.net.connectionCount + 1}`);
       } else {
         this._initialGameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
         this.log.logInfo(this._initialGameState.toString());
