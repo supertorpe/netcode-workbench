@@ -47,6 +47,7 @@ export class SimpleRenderer extends Renderer {
     private renderWithInterpolation() {
         let currentTime = currentTimestamp();
         const gameState = this.netcode.getGameStateToRender() as SimpleGameState;
+        if (!gameState) return;
         const gameStateTime = this.netcode.tickTime(gameState.tick);
         const nextGameState = this.netcode.getGameState(gameState.tick + 1) as (SimpleGameState | null);
         const nextGameStateTime = nextGameState ? this.netcode.tickTime(nextGameState.tick) : undefined;
