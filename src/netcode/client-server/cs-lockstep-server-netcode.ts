@@ -35,17 +35,16 @@ export class CSLockstepServerNetCode extends BaseNetCode {
           } else {
             this._initialGameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
             this.log.logInfo(this._initialGameState.toString());
-            //result = this._initialGameState.toLog();
+            result = this._initialGameState.toLog();
             // compute next state
             this.gameStateMachine.compute(this._initialGameState);
             this._currentTick++;
             this._initialGameState.incTick();
             this._initialGameState.clearCommands();
-            // build and broadcast to clients a SimpleGameState
+            // build and broadcast a SimpleGameState to clients
             const simpleGameState = (this._initialGameState as PlanckGameState).buildSimpleGameState();
             this.log.logInfo(`sending gamestate: ${simpleGameState.toLog()}`);
             this.net.broadcast(new GameStateMessage(simpleGameState));
-            result = this._initialGameState.toLog();
           }
         }
         return result;
