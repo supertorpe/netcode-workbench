@@ -236,8 +236,9 @@ class Gui {
 
     private bootstrapAngular() {
         angular.module('app', [])
-            .controller('mainCtrl', ['$scope', ($scope) => {
+            .controller('mainCtrl', ['$scope', '$timeout', ($scope, $timeout) => {
                 $scope.info = {
+                    showSpinner: false,
                     btnStopEnabled: false,
                     btnPlayEnabled: true,
                     btnSaveEnabled: true,
@@ -319,15 +320,15 @@ class Gui {
                 });
 
                 this.deviceServer.deviceUpdatedEmitter.addEventListener(() => {
-                    $scope.$apply();
+                    if ($scope.info.realtimeGameStates || $scope.info.realtimeLogs) $scope.$apply();
                 });
 
                 this.devicePlayer1.deviceUpdatedEmitter.addEventListener(() => {
-                    $scope.$apply();
+                    if ($scope.info.realtimeGameStates || $scope.info.realtimeLogs) $scope.$apply();
                 });
 
                 this.devicePlayer2.deviceUpdatedEmitter.addEventListener(() => {
-                    $scope.$apply();
+                    if ($scope.info.realtimeGameStates || $scope.info.realtimeLogs) $scope.$apply();
                 });
 
                 const syncButtonHtml = '<button class="jsPanel-btn jsPanel-btn-menu jsPanel-btn-md tooltip bottom" aria-label="Sync scroll"><span class="fas fa-arrows-alt-v toolbar-icon" style="vertical-align: text-top"></span><input type="checkbox" checked /></button>';
@@ -438,12 +439,16 @@ class Gui {
                 };
 
                 $scope.stop = () => {
-                    this.deviceServer.stop();
-                    this.devicePlayer1.stop();
-                    this.devicePlayer2.stop();
-                    $scope.info.btnStopEnabled = false;
-                    $scope.info.btnPlayEnabled = true;
-                    $scope.info.playing = false;
+                    $scope.info.showSpinner = true;
+                    $timeout(() => {  
+                        this.deviceServer.stop();
+                        this.devicePlayer1.stop();
+                        this.devicePlayer2.stop();
+                        $scope.info.btnStopEnabled = false;
+                        $scope.info.btnPlayEnabled = true;
+                        $scope.info.playing = false;
+                        $timeout(() => {  $scope.info.showSpinner = false; });
+                     });
                 };
                 $scope.play = () => {
                     // cleanup

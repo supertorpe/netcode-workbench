@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Netcode Workbench</title>
+    <title>Netcode Workbench - visual console to test game state synchronization algorithms</title>
+	<meta name="keywords" content="netcode,network,game,state,sync,algorithm,prediction,interpolation,reconciliation,latency,lag,debug,console,p2p,client,server" />
+	<meta name="description" content="Visual console to test game state synchronization algorithms with latency, packet loss, p2p, client/server, client side prediction, interpolation/extrapolation, etc." />
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         [ng\:cloak],
@@ -236,6 +238,7 @@
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
+    <div data-ng-if="info.showSpinner" class="loading"><div class="loader"></div></div>
     <script type="module" src="/src/main.ts"></script>
 </body>
 

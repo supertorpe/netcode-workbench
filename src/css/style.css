@@ -69,3 +69,73 @@ table th:first-of-type, table td:first-of-type {
 table th:nth-of-type(2), table td:nth-of-type(2) {
   text-align: left;
 }
+.loading {
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  background: white;
+  z-index: 1000;
+  opacity: 0.8;
+
+}
+.loader{
+  font-size:10px;
+  top:40%;
+  left:40%;
+ text-indent:-9999em;
+ width:11em;
+ height:11em;
+ border-radius:50%;
+ background:#d8d9b9;
+ background:-moz-linear-gradient(left,#d8d9b9 10%,rgba(216,217,185,0) 42%);
+ background:-webkit-linear-gradient(left,#d8d9b9 10%,rgba(216,217,185,0) 42%);
+ background:-o-linear-gradient(left,#d8d9b9 10%,rgba(216,217,185,0) 42%);
+ background:-ms-linear-gradient(left,#d8d9b9 10%,rgba(216,217,185,0) 42%);
+ background:linear-gradient(to right,#d8d9b9 10%,rgba(216,217,185,0) 42%);
+ position:relative;
+ -webkit-animation:load3 1.4s infinite linear;
+ animation:load3 1.4s infinite linear
+}
+.loader:after,.loader:before{
+ content:'';
+ position:absolute;
+ top:0;
+ left:0
+}
+.loader:before{
+ width:50%;
+ height:50%;
+ background:#d8d9b9;
+ border-radius:100% 0 0
+}
+.loader:after{
+ background:white;
+ width:75%;
+ height:75%;
+ border-radius:50%;
+ margin:auto;
+ bottom:0;
+ right:0
+}
+@-webkit-keyframes load3{
+ 0%{
+   -webkit-transform:rotate(0);
+   transform:rotate(0)
+ }
+ 100%{
+   -webkit-transform:rotate(360deg);
+   transform:rotate(360deg)
+ }
+}
+@keyframes load3{
+ 0%{
+   -webkit-transform:rotate(0);
+   transform:rotate(0)
+ }
+ 100%{
+   -webkit-transform:rotate(360deg);
+   transform:rotate(360deg)
+ }
+}
