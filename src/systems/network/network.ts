@@ -1,7 +1,7 @@
-import { Message } from '../model';
-import { EventEmitter } from './event-emitter';
-import { currentTimestamp, randomInt } from '../utils';
-import { Log } from './log';
+import { Message } from '../../model';
+import { EventEmitter } from '../../commons/event-emitter';
+import { currentTimestamp, randomInt } from '../../commons/utils';
+import { Log } from '../log/log';
 
 export class NetworkInterface {
     private connections: NetworkConn[] = [];

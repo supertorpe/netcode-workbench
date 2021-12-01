@@ -1,14 +1,13 @@
 import 'mini.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import 'jspanel4/dist/jspanel.min.css';
-import '../css/style.css';
+import '../../css/style.css';
 
 import { jsPanel } from 'jspanel4';
 import * as angular from 'angular';
 import { createWriteStream } from 'streamsaver';
-import { config } from '../config';
-import { ClientDevice } from './client-device';
-import { ServerDevice } from './server-device';
+import { config } from '../../config';
+import { ClientDevice, ServerDevice } from '../devices';
 
 class Gui {
 
@@ -251,7 +250,7 @@ class Gui {
                     latency2: { min: config.network.minLatency2, max: config.network.maxLatency2 },
                     packetLoss2: config.network.packetLoss2,
                     npcs: 0,
-                    realtimeGameStates: false,
+                    realtimeGameStates: true,
                     realtimeLogs: false,
                     interpolation: true,
                     debugBoxes: true,

@@ -1,5 +1,5 @@
-import { BaseNetCode } from "../netcode";
-import { Log } from "./log";
+import { BaseNetCode } from "../../netcode";
+import { Log } from "../log/log";
 
 export abstract class Renderer {
 

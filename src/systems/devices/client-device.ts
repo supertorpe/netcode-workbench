@@ -1,6 +1,6 @@
-import { CONSTS } from "../config";
+import { CONSTS } from "../../config";
 import { Device } from "./device";
-import { input } from './input';
+import { input } from '../input/input';
 
 export class ClientDevice extends Device {
     constructor(

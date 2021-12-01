@@ -1,4 +1,4 @@
-import { currentTimestamp } from '../utils';
+import { currentTimestamp } from '../../commons/utils';
 
 export enum LogLevel {
     INFO = 'INFO',

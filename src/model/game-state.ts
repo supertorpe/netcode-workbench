@@ -56,9 +56,6 @@ export abstract class GameState {
 }
 
 export interface GameStateMachine {
+    buildInitialGameState(): GameState;
     compute(gameState: GameState): void;
-}
-
-export class DummyGameStateMachine implements GameStateMachine {
-    compute(_gameState: GameState) { }
 }

@@ -1,3 +1,4 @@
 export * from './base-netcode';
 export * from './netcode-factory';
-export * from './p2p/p2p-naive-netcode';
+export * from './p2p';
+export * from './client-server';

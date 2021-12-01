@@ -1,6 +1,6 @@
 import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage } from '../model';
 import { Log, NetworkInterface } from '../systems';
-import { currentTimestamp } from '../utils';
+import { currentTimestamp } from '../commons/utils';
 
 export abstract class BaseNetCode {
 
