@@ -5,6 +5,7 @@ import { CSLockstepClientNetCode } from './client-server/cs-lockstep-client-netc
 import { CSLockstepServerNetCode } from './client-server/cs-lockstep-server-netcode';
 import { P2PNaiveNetCode } from './p2p/p2p-naive-netcode';
 import { P2PDelayedNetCode } from './p2p/p2p-delayed-netcode';
+import { INetCode } from '.';
 
 export class NetCodeFactory {
     constructor() { }
@@ -26,5 +27,8 @@ export class NetCodeFactory {
                 log.logInfo(`Netcode ${algorithm} not found`);
                 return null;
         }
+    }
+    public static buildFromClass(Class: INetCode, log: Log, net: NetworkInterface, gameStateMachine: GameStateMachine): BaseNetCode | null {
+        return new Class(log, net, gameStateMachine);
     }
 }

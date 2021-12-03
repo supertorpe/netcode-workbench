@@ -39,7 +39,13 @@
                         <select id="selAlgorithm" class="input-small" data-ng-model="info.algorithm"
                             data-ng-options="item as item.name for item in info.netcodes"
                             data-ng-change="changeAlgorithm()" data-ng-disabled="info.btnStopEnabled">
-                    </select></td>
+                        </select>
+                    </td>
+                </tr>
+                <tr data-ng-if="info.algorithm.type === 'custom'">
+                    <td colspan="2" class="center-text">
+                        <input type="text" id="txtAlgorithmUrl" class="input-large" data-ng-model="info.algorithmUrl" placeholder="Algorithm URL" data-ng-disabled="info.btnStopEnabled"/>
+                    </td>
                 </tr>
                 <tr>
                     <td data-label="Property">Tick (ms)</td>

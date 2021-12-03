@@ -41,6 +41,11 @@ canvas {
   padding:0;
   font-size: 0.9em;
 }
+.input-large {
+  padding:0;
+  font-size: 0.9em;
+  width: 90%;
+}
 .small-text {
   font-size: 0.9em;
 }

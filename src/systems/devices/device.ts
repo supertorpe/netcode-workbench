@@ -3,7 +3,7 @@ import { NetworkConn, NetworkInterface } from '../network';
 import { Log } from '../log';
 import { EventEmitter } from '../../commons';
 import { GameStateLog, GameStateMachine } from '../../model';
-import { BaseNetCode, NetCodeFactory } from '../../netcode';
+import { BaseNetCode, INetCode, NetCodeFactory } from '../../netcode';
 import { Renderer, PlanckRenderer, SimpleRenderer } from '../renderers';
 import { PlanckGameStateMachine, SimpleGameStateMachine } from '../gamestate-machine';
 
@@ -59,6 +59,7 @@ export class Device {
 
     public play(
         algorithm: NetcodeConfig,
+        netcodeClass: INetCode | null,
         tickMs: number,
         npcs: number,
         usePlanck: boolean, 
@@ -71,10 +72,17 @@ export class Device {
             new SimpleGameStateMachine()
         );
         // initialize netcode
-        let algorithmName = algorithm.name + (algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
-        const netcode = NetCodeFactory.build(algorithmName, this._log, this._networkInterface, this.gameStateMachine);
-        if (netcode !== null) this.netcode = netcode;
-        else return;
+        let netcode: BaseNetCode | null;
+        if (netcodeClass === null) {
+            const algorithmName = algorithm.name + (algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
+            netcode = NetCodeFactory.build(algorithmName, this._log, this._networkInterface, this.gameStateMachine);
+        } else {
+            netcode = NetCodeFactory.buildFromClass(netcodeClass, this.log, this._networkInterface, this.gameStateMachine);
+        }
+        if (netcode !== null)
+            this.netcode = netcode;
+        else
+            return;
         this.netcode.tickMs = tickMs;
         // npcs
         this._npcs = npcs;

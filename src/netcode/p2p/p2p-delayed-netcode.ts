@@ -15,9 +15,9 @@ export class P2PDelayedNetCode extends BaseNetCode {
   private remoteCommands: Command[] = [];
   private prevGameState: GameState | undefined;
 
-  public start(initialGameState: GameState): number {
-    return super.start(initialGameState);
-    this.prevGameState = initialGameState;
+  public start(gameState: GameState): number {
+    return super.start(gameState);
+    this.prevGameState = gameState;
   }
 
   public tick(): GameStateLog | null {
@@ -28,30 +28,30 @@ export class P2PDelayedNetCode extends BaseNetCode {
       // dump commands (local and remote) into the current game state
       if (!this.localCommandDumped && this.localCommand) {
         this.localCommandDumped = true;
-        this._initialGameState.commands.push(this.localCommand);
+        this._gameState.commands.push(this.localCommand);
       }
       let removed = 0;
       const remoteCommandsCount = this.remoteCommands.length;
       for (let index = 0; index < remoteCommandsCount; index++) {
         let command = this.remoteCommands[index];
-        if (command && command.tick === this._initialGameState.tick) {
-          this._initialGameState.commands.push(command);
+        if (command && command.tick === this._gameState.tick) {
+          this._gameState.commands.push(command);
           this.remoteCommands.splice(index - removed++, 1);
         }
       }
       // check if there aren't commands left
-      if (this._initialGameState.commands.length < this.net.connectionCount + 1) {
-        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._initialGameState.commands.length} of ${this.net.connectionCount + 1}`);
+      if (this._gameState.commands.length < this.net.connectionCount + 1) {
+        this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._gameState.commands.length} of ${this.net.connectionCount + 1}`);
       } else {
-        this._initialGameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-        this.log.logInfo(this._initialGameState.toString());
-        result = this._initialGameState.toLog();
+        this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
+        this.log.logInfo(this._gameState.toString());
+        result = this._gameState.toLog();
         // compute next state
-        this.prevGameState = this._initialGameState.clone();
-        this.gameStateMachine.compute(this._initialGameState);
+        this.prevGameState = this._gameState.clone();
+        this.gameStateMachine.compute(this._gameState);
         this._currentTick++;
-        this._initialGameState.incTick();
-        this._initialGameState.clearCommands();
+        this._gameState.incTick();
+        this._gameState.clearCommands();
         this.localCommand = undefined;
         this.localCommandDumped = false;
       }
@@ -78,12 +78,12 @@ export class P2PDelayedNetCode extends BaseNetCode {
   }
 
   public getGameStateToRender(): GameState {
-    return (this.prevGameState ? this.prevGameState : this._initialGameState);
+    return (this.prevGameState ? this.prevGameState : this._gameState);
   }
 
   public getGameState(tick: number): GameState | null {
-    if (this._initialGameState.tick === tick)
-      return this._initialGameState;
+    if (this._gameState.tick === tick)
+      return this._gameState;
     else if (this.prevGameState && this.prevGameState.tick === tick)
       return this.prevGameState;
     else

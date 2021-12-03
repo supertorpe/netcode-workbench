@@ -2,9 +2,24 @@ import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage 
 import { Log, NetworkInterface } from '../systems';
 import { currentTimestamp } from '../commons/utils';
 
+export interface INetCode {
+    new (log: Log, net: NetworkInterface, gameStateMachine: GameStateMachine) : BaseNetCode;
+    get tickMs(): number;
+    set tickMs(value: number);
+    start(gameState?: GameState): number;
+    tick(): void;
+    tickBasedOnTime(): number;
+    tickTime(tick: number): number;
+    localCommandReceived(playerId: number, commandValue: number): void;
+    remoteCommandReceived(command: Command): void;
+    gameStateReceived(gameState: GameState): void;
+    getGameStateToRender(): GameState;
+    getGameState(tick: number): GameState | null;
+}
+
 export abstract class BaseNetCode {
 
-    protected _initialGameState!: GameState;
+    protected _gameState!: GameState;
     protected _startTime: number;
     protected _tickMs: number;
     protected _currentTick: number;
@@ -27,10 +42,10 @@ export abstract class BaseNetCode {
     set tickMs(value: number) { this._tickMs = value; }
     get currentTick(): number { return this._currentTick; }
 
-    public start(initialGameState?: GameState): number {
+    public start(gameState?: GameState): number {
         this._startTime = currentTimestamp();
         this._currentTick = 0;
-        if (initialGameState) this._initialGameState = initialGameState;
+        if (gameState) this._gameState = gameState;
         return this._startTime;
     }
 

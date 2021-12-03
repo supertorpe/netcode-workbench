@@ -10,6 +10,7 @@
 - Optionally draw debug boxes to see smoothing effect
 - Realtime and downloadable logs and game state history
 - Easily extensible inheriting from the BaseNetCode class
+- Externalizable netcodes
 - Simple game simulation with planck-js physics engine
 
 ### TO DO
@@ -21,6 +22,20 @@
 - p2p-delayed: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better by delaying the render frame
 #### Client-Server
 - cs-lockstep: The server advances the tick when the time comes but only if it has received the commands from all the clients. The server calculates the physics and sends the game state to the clients
+#### Custom
+You can host your own netcode. For example:
+https://gist.github.com/supertorpe/7a7837fb135d6dfaef77667f2da37468
+```javascript
+export const type = 'cs';
+export const name = 'customLockstepClientServer';
+export class ClientNetCode extends BaseNetCode {
+  //...
+}
+export class ServerNetCode extends BaseNetCode {
+  //...
+}
+```
+...and load it selecting "Custom" algorithm and writing the URL of the file.
 ## Screenshot
 <img src="https://supertorpe.github.io/netcode-workbench/assets/screenshot.png" />
 

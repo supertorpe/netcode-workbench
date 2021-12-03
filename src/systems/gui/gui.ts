@@ -6,8 +6,11 @@ import '../../css/style.css';
 import { jsPanel } from 'jspanel4';
 import * as angular from 'angular';
 import { createWriteStream } from 'streamsaver';
-import { config } from '../../config';
+import { config, NetcodeConfig } from '../../config';
 import { ClientDevice, ServerDevice } from '../devices';
+import { BaseNetCode, INetCode } from '../../netcode';
+import { Command, CommandMessage, GameStateMessage } from '../../model';
+import { currentTimestamp } from '../../commons';
 
 class Gui {
 
@@ -233,6 +236,19 @@ class Gui {
         writer.close();
     }
 
+    private showError(title: string, message: any) {
+        jsPanel.create({
+            dragit: false,
+            resizeit: false,
+            headerControls: 'closeonly  xs',
+            position: 'center-top 0 15 down',
+            contentSize: '330 auto',
+            content: `<p>${message}</p>`,
+            theme: 'warning filled',
+            headerTitle: `${title}`
+        });
+    }
+
     private bootstrapAngular() {
         angular.module('app', [])
             .controller('mainCtrl', ['$scope', '$timeout', ($scope, $timeout) => {
@@ -431,6 +447,7 @@ class Gui {
                 });
 
                 $scope.changeAlgorithm = () => {
+                    if ($scope.info.algorithm.type === 'custom') return;
                     const p2pmode = $scope.info.algorithm.type === 'p2p';
                     if (p2pmode === this.p2pmode) return;
                     this.p2pmode = p2pmode;
@@ -449,21 +466,53 @@ class Gui {
                         $timeout(() => {  $scope.info.showSpinner = false; });
                      });
                 };
-                $scope.play = () => {
+                $scope.play = async () => {
+                    if ($scope.info.algorithm.type === 'custom') {
+                        if (!$scope.info.algorithmUrl) {
+                            this.showError('Loading algorithm', 'Empty Algorithm URL');
+                            return;
+                        }
+                        const response = await fetch($scope.info.algorithmUrl);
+                        const content = await response.text();
+                        try {
+                            // ugly workaround: inject Classes into the global namespace so the external module can use them
+                            (<any>window).currentTimestamp = currentTimestamp;
+                            (<any>window).BaseNetCode = BaseNetCode;
+                            (<any>window).Command = Command;
+                            (<any>window).CommandMessage = CommandMessage;
+                            (<any>window).GameStateMessage = GameStateMessage;
+                            // import external module
+                            const { type, name, ClientNetCode, ServerNetCode } = await import(/* @vite-ignore */`data:text/javascript;charset=utf-8,${encodeURIComponent(content)}`);
+                            const algorithm =  new NetcodeConfig(name, type);
+                            this.p2pmode = (type === 'p2p');
+                            this.resetLayout();
+                            if (this.p2pmode) {
+                                $scope.internalPlay(algorithm, ClientNetCode, null);
+                            } else {
+                                $scope.internalPlay(algorithm, ClientNetCode, ServerNetCode);
+                            }
+                        } catch(error) {
+                            this.showError('Loading algorithm', error);
+                        }
+                    } else {
+                        $scope.internalPlay($scope.info.algorithm, null, null);
+                    }
+                }
+                $scope.internalPlay = (algorithm: NetcodeConfig, ClientNetCodeClass: INetCode | null, ServerNetCodeClass: INetCode | null) => {
                     // cleanup
                     this.deviceServer.reset();
                     this.devicePlayer1.reset();
                     this.devicePlayer2.reset();
-                    if ($scope.info.algorithm.type === 'p2p') {
+                    if (algorithm.type === 'p2p') {
                         this.devicePlayer1.connect(this.devicePlayer2, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
-                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                     } else {
                         this.devicePlayer1.connect(this.deviceServer, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
                         this.devicePlayer2.connect(this.deviceServer, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.deviceServer.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, true, false, false);
-                        this.devicePlayer1.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
-                        this.devicePlayer2.play($scope.info.algorithm, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.deviceServer.play(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, true, false, false);
+                        this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
                     }
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;

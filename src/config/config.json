@@ -25,6 +25,10 @@
             {
                 "name": "cs-lockstep",
                 "type": "cs"
+            },
+            {
+                "name": "custom",
+                "type": "custom"
             }
         ],
         "players": [
