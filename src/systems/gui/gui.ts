@@ -261,6 +261,8 @@ class Gui {
                     tick: config.network.tickMs,
                     netcodes: config.netcodes,
                     algorithm: config.netcodes[0],
+                    serializers: config.serializers,
+                    serializer: config.serializers[0],
                     latency1: { min: config.network.minLatency1, max: config.network.maxLatency1 },
                     packetLoss1: config.network.packetLoss1,
                     latency2: { min: config.network.minLatency2, max: config.network.maxLatency2 },
@@ -503,13 +505,31 @@ class Gui {
                     this.deviceServer.reset();
                     this.devicePlayer1.reset();
                     this.devicePlayer2.reset();
+                    this.devicePlayer1.trafficLog.incomingEmitter.addEventListener((trace) => {
+                        this.devicePlayer1.log.logInfo(`incoming ${trace.size} bytes`);
+                    });
+                    this.devicePlayer1.trafficLog.outgoingEmitter.addEventListener((trace) => {
+                        this.devicePlayer1.log.logInfo(`outgoing ${trace.size} bytes`);
+                    });
+                    this.devicePlayer2.trafficLog.incomingEmitter.addEventListener((trace) => {
+                        this.devicePlayer2.log.logInfo(`incoming ${trace.size} bytes`);
+                    });
+                    this.devicePlayer2.trafficLog.outgoingEmitter.addEventListener((trace) => {
+                        this.devicePlayer2.log.logInfo(`outgoing ${trace.size} bytes`);
+                    });
+                    this.deviceServer.trafficLog.incomingEmitter.addEventListener((trace) => {
+                        this.deviceServer.log.logInfo(`incoming ${trace.size} bytes`);
+                    });
+                    this.deviceServer.trafficLog.outgoingEmitter.addEventListener((trace) => {
+                        this.deviceServer.log.logInfo(`outgoing ${trace.size} bytes`);
+                    });
                     if (algorithm.type === 'p2p') {
-                        this.devicePlayer1.connect(this.devicePlayer2, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                        this.devicePlayer1.connect(this.devicePlayer2, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                         this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                     } else {
-                        this.devicePlayer1.connect(this.deviceServer, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
-                        this.devicePlayer2.connect(this.deviceServer, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                        this.devicePlayer1.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
+                        this.devicePlayer2.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         this.deviceServer.play(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, true, false, false);
                         this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);
                         this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes);

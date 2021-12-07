@@ -42,6 +42,15 @@
                         </select>
                     </td>
                 </tr>
+                <tr>
+                    <td data-label="Property">Serializer</td>
+                    <td data-label="Value">
+                        <select id="selSerializer" class="input-small" data-ng-model="info.serializer"
+                            data-ng-options="item as item.name for item in info.serializers"
+                            data-ng-disabled="info.btnStopEnabled">
+                        </select>
+                    </td>
+                </tr>
                 <tr data-ng-if="info.algorithm.type === 'custom'">
                     <td colspan="2" class="center-text">
                         <input type="text" id="txtAlgorithmUrl" class="input-large" data-ng-model="info.algorithmUrl" placeholder="Algorithm URL" data-ng-disabled="info.btnStopEnabled"/>

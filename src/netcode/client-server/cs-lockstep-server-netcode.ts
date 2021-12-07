@@ -1,4 +1,4 @@
-import { Command, GameState, GameStateLog, GameStateMessage, PlanckGameState } from "../../model";
+import { Command, CommandUtils, GameState, GameStateLog, GameStateMessage, PlanckGameState, PlanckGameStateUtils, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../base-netcode";
 
 export class CSLockstepServerNetCode extends BaseNetCode {
@@ -11,10 +11,10 @@ export class CSLockstepServerNetCode extends BaseNetCode {
         // broadcast the initial gamestate
         if (!this.initialGameStateSent) {
             this.initialGameStateSent = true;
-            const simpleGameState = (this._gameState as PlanckGameState).buildSimpleGameState();
-            this.log.logInfo(`sending gamestate: ${simpleGameState.toLog()}`);
+            const simpleGameState = PlanckGameStateUtils.buildSimpleGameState(this._gameState as PlanckGameState);
+            this.log.logInfo(`sending gamestate: ${SimpleGameStateUtils.toLog(simpleGameState)}`);
             this.net.broadcast(new GameStateMessage(simpleGameState));
-            result = this._gameState.toLog();
+            result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
         }
         // check if a new gamestate needs to be created
         const tickBasedOnTime = this.tickBasedOnTime();
@@ -34,16 +34,16 @@ export class CSLockstepServerNetCode extends BaseNetCode {
             this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._gameState.commands.length} of ${this.net.connectionCount}`);
           } else {
             this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-            this.log.logInfo(this._gameState.toString());
-            result = this._gameState.toLog();
+            this.log.logInfo(PlanckGameStateUtils.toString(this._gameState as PlanckGameState));
+            result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
             // compute next state
             this.gameStateMachine.compute(this._gameState);
             this._currentTick++;
-            this._gameState.incTick();
-            this._gameState.clearCommands();
+            PlanckGameStateUtils.incTick(this._gameState);
+            PlanckGameStateUtils.clearCommands(this._gameState);
             // build and broadcast a SimpleGameState to clients
-            const simpleGameState = (this._gameState as PlanckGameState).buildSimpleGameState();
-            this.log.logInfo(`sending gamestate: ${simpleGameState.toLog()}`);
+            const simpleGameState = PlanckGameStateUtils.buildSimpleGameState(this._gameState as PlanckGameState);
+            this.log.logInfo(`sending gamestate: ${SimpleGameStateUtils.toLog(simpleGameState)}`);
             this.net.broadcast(new GameStateMessage(simpleGameState));
           }
         }
@@ -54,7 +54,7 @@ export class CSLockstepServerNetCode extends BaseNetCode {
         throw new Error("CSLockstepServerNetCode: does not support receiving local commands");
     }
     public remoteCommandReceived(command: Command): void {
-        this.log.logInfo(`received command: ${command.toFullString()}`);
+        this.log.logInfo(`received command: ${CommandUtils.toFullString(command)}`);
         this.remoteCommands.push(command);
     }
     public gameStateReceived(_gameState: GameState): void {

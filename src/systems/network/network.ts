@@ -2,14 +2,18 @@ import { Message } from '../../model';
 import { EventEmitter } from '../../commons/event-emitter';
 import { currentTimestamp, randomInt } from '../../commons/utils';
 import { Log } from '../log/log';
+import { Serializer } from '../serializers';
+import { NetworkLog } from '../log';
 
 export class NetworkInterface {
+    private _trafficlog: NetworkLog = new NetworkLog();
     private connections: NetworkConn[] = [];
     private _connectionEmitter: EventEmitter<NetworkConn> = new EventEmitter<NetworkConn>();
     private _disconnectionEmitter: EventEmitter<NetworkConn> = new EventEmitter<NetworkConn>();
     private _messageSentEmitter: EventEmitter<Message> = new EventEmitter<Message>();
     private _messageReceivedEmitter: EventEmitter<Message> = new EventEmitter<Message>();
 
+    get trafficLog(): NetworkLog { return this._trafficlog; }
     get connectionCount(): number { return this.connections.length; }
     get connectionEmitter(): EventEmitter<NetworkConn> { return this._connectionEmitter; }
     get disconnectionEmitter(): EventEmitter<NetworkConn> { return this._disconnectionEmitter; }
@@ -60,11 +64,12 @@ export class NetworkInterface {
         this.connections = [];
     }
 
-    public resetEmitters() {
+    public removeListeners() {
         this._connectionEmitter.removeListeners();
         this._disconnectionEmitter.removeListeners();
         this._messageSentEmitter.removeListeners();
         this._messageReceivedEmitter.removeListeners();
+        this._trafficlog.removeListeners();
     }
 
     public broadcast(message: Message) {
@@ -89,7 +94,7 @@ export class NetworkConn {
     private _messageSentEmitter: EventEmitter<Message> = new EventEmitter<Message>();
     private _messageReceivedEmitter: EventEmitter<Message> = new EventEmitter<Message>();
 
-    constructor(public peerId: number, private log: Log) { }
+    constructor(private intf: NetworkInterface, public peerId: number, private log: Log, private serializer: Serializer) { }
 
     get connectionEmitter(): EventEmitter<NetworkConn> { return this._connectionEmitter; }
     get disconnectionEmitter(): EventEmitter<NetworkConn> { return this._disconnectionEmitter; }
@@ -119,18 +124,22 @@ export class NetworkConn {
             }
         }
         this._totalSent++;
+        const messageBuffer = this.serializer.encode(message);
+        this.intf.trafficLog.logOut(message.timestampOrigin, messageBuffer.byteLength);
         this._messageSentEmitter.notify(message);
         if (this.maxLatency === 0) {
-            this._peer.receive(message);
+            this._peer.receive(messageBuffer);
         } else {
             setTimeout(() => {
-                this._peer.receive(message);
+                this._peer.receive(messageBuffer);
             }, randomInt(this._minLatency, this._maxLatency));
         }
     }
 
-    public receive(message: Message) {
+    public receive(messageBuffer: ArrayBuffer) {
+        const message: Message = this.serializer.decode(messageBuffer);
         message.timestampDestination = currentTimestamp();
+        this.intf.trafficLog.logIn(message.timestampDestination, messageBuffer.byteLength);
         this._messageReceivedEmitter.notify(message);
     }
 

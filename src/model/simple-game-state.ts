@@ -1,3 +1,4 @@
+import { Command, CommandUtils } from './command';
 import { config } from '../config';
 import { CommandLog, GameState, GameStateLog, PlayerLog } from './game-state';
 
@@ -8,65 +9,62 @@ export class SimpleBodyState {
         public velX: number, public velY: number,
         public width: number, public height: number,
         public color: string) { }
-    
-    public clone() : SimpleBodyState {
+}
+
+export class SimpleBodyStateUtils {
+    public static clone(simpleBodyState: SimpleBodyState) : SimpleBodyState {
         return new SimpleBodyState(
-            this.id, this.isStatic,
-            this.posX, this.posY,
-            this.velX, this.velY,
-            this.width, this.height,
-            this.color);
+            simpleBodyState.id, simpleBodyState.isStatic,
+            simpleBodyState.posX, simpleBodyState.posY,
+            simpleBodyState.velX, simpleBodyState.velY,
+            simpleBodyState.width, simpleBodyState.height,
+            simpleBodyState.color);
     }
 }
 
 export class SimpleGameState extends GameState {
+    constructor(public tick: number, public commands: Command[], public bodies: SimpleBodyState[]) {
+        super(tick, commands);
+    }
+}
 
-    private _bodies: SimpleBodyState[];
+export class SimpleGameStateUtils {
 
-    constructor(tick: number, bodies: SimpleBodyState[]) {
-        super(tick);
-        this._bodies = bodies;
+    public static bodyFromPlayer(simpleGameState: SimpleGameState, playerId: number): SimpleBodyState | undefined {
+        return simpleGameState.bodies.find(body => body.id === playerId);
     }
 
-    get bodies(): SimpleBodyState[] { return this._bodies; }
-
-    public bodyFromPlayer(playerId: number): SimpleBodyState | undefined {
-        return this._bodies.find(body => body.id === playerId);
-    }
-
-    public toString(): string {
+    public static toString(simpleGameState: SimpleGameState): string {
         let bodiesStr = '';
-        this._bodies.forEach((body) => {
+        simpleGameState.bodies.forEach((body) => {
             if (!body.isStatic)
                 bodiesStr += `    P${body.id} x=${body.posX * config.physics.worldScale} y=${body.posY * config.physics.worldScale}\n`;
         });
-        return `\nGameState tick: ${this._tick}
+        return `\nGameState tick: ${simpleGameState.tick}
   bodies:
-${bodiesStr}  commands:
-    ${this._commands.join('\n    ')}`;
+${bodiesStr}  ${simpleGameState.commands.length>0?"commands    ":""}${CommandUtils.arrayToString(simpleGameState.commands)}`;
     }
 
-    public clone(): GameState {
+    public static clone(simpleGameState: SimpleGameState): GameState {
         const bodies: SimpleBodyState[] = [];
-        this._bodies.forEach((body) => { bodies.push(body.clone()); });
-        const result = new SimpleGameState(this._tick, this._bodies);
-        this._commands.forEach(command => result.commands.push(command.clone(false)));
+        simpleGameState.bodies.forEach((body) => { bodies.push(SimpleBodyStateUtils.clone(body)); });
+        const result = new SimpleGameState(simpleGameState.tick, CommandUtils.cloneArray(simpleGameState.commands), simpleGameState.bodies);
         return result;
     }
 
-    public toLog(): GameStateLog {
+    public static toLog(simpleGameState: SimpleGameState): GameStateLog {
         const players: PlayerLog[] = [];
-        this._bodies.forEach((body) => {
+        simpleGameState.bodies.forEach((body) => {
             if (!body.isStatic)
                 players.push(new PlayerLog(body.id, body.posX * config.physics.worldScale, body.posY * config.physics.worldScale));
         });
         players.sort((a, b) => a.id > b.id ? 1 : -1);
         const commands: CommandLog[] = [];
-        this._commands.forEach((command) => {
+        simpleGameState.commands.forEach((command) => {
             commands.push(new CommandLog(command.playerId, command.value));
         });
         commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-        return new GameStateLog(this._tick, players, commands);
+        return new GameStateLog(simpleGameState.tick, players, commands);
     }
 }
 

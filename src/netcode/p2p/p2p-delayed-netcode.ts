@@ -1,4 +1,4 @@
-import { Command, CommandMessage, GameState, GameStateLog } from '../../model';
+import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, PlanckGameState, PlanckGameStateUtils } from '../../model';
 import { BaseNetCode } from '../base-netcode';
 
 /*
@@ -16,8 +16,9 @@ export class P2PDelayedNetCode extends BaseNetCode {
   private prevGameState: GameState | undefined;
 
   public start(gameState: GameState): number {
-    return super.start(gameState);
     this.prevGameState = gameState;
+    return super.start(gameState);
+
   }
 
   public tick(): GameStateLog | null {
@@ -44,14 +45,14 @@ export class P2PDelayedNetCode extends BaseNetCode {
         this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._gameState.commands.length} of ${this.net.connectionCount + 1}`);
       } else {
         this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-        this.log.logInfo(this._gameState.toString());
-        result = this._gameState.toLog();
+        this.log.logInfo(PlanckGameStateUtils.toString(this._gameState as PlanckGameState));
+        result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
         // compute next state
-        this.prevGameState = this._gameState.clone();
+        this.prevGameState = PlanckGameStateUtils.clone(this._gameState as PlanckGameState);
         this.gameStateMachine.compute(this._gameState);
         this._currentTick++;
-        this._gameState.incTick();
-        this._gameState.clearCommands();
+        PlanckGameStateUtils.incTick(this._gameState);
+        PlanckGameStateUtils.clearCommands(this._gameState);
         this.localCommand = undefined;
         this.localCommandDumped = false;
       }
@@ -63,13 +64,13 @@ export class P2PDelayedNetCode extends BaseNetCode {
     if (!this.localCommand) {
       const command = new Command(this._currentTick, playerId, commandValue);
       this.localCommand = command;
-      this.log.logInfo(`sending local command: ${command.toFullString()}`);
+      this.log.logInfo(`sending local command: ${CommandUtils.toFullString(command)}`);
       this.net.broadcast(new CommandMessage(command));
     }
   }
 
   public remoteCommandReceived(command: Command): void {
-    this.log.logInfo(`received command: ${command.toFullString()}`);
+    this.log.logInfo(`received command: ${CommandUtils.toFullString(command)}`);
     this.remoteCommands.push(command);
   }
   

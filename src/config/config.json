@@ -13,6 +13,17 @@
             "maxLatency2": 30,
             "packetLoss2": 0
         },
+        "serializers": [
+            {
+                "name": "json"
+            },
+            {
+                "name": "cbor-x"
+            },
+            {
+                "name": "msgpackr"
+            }
+        ],
         "netcodes": [
             {
                 "name": "p2p-naive",

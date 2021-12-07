@@ -3,6 +3,9 @@ import configJson from './config.json';
 export class CanvasConfig {
     constructor(public width: number, public height: number) { }
 }
+export class SerializerConfig {
+    constructor(public name: string) { }
+}
 export class NetcodeConfig {
     constructor(public name: string, public type: string) { }
 }
@@ -29,6 +32,7 @@ export class PhysicsConfig {
 export class Config {
     constructor(
         public canvas: CanvasConfig,
+        public serializers: SerializerConfig[],
         public netcodes: NetcodeConfig[],
         public network: NetworkConfig,
         public players: PlayerConfig[],

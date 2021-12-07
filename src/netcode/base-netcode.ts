@@ -1,4 +1,4 @@
-import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage } from '../model';
+import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage, Message } from '../model';
 import { Log, NetworkInterface } from '../systems';
 import { currentTimestamp } from '../commons/utils';
 
@@ -29,9 +29,9 @@ export abstract class BaseNetCode {
         this._tickMs = 50;
         this._currentTick = 0;
         this.net.messageReceivedEmitter.addEventListener((message) => {
-            if (message instanceof CommandMessage)
+            if (message.kind === Message.KIND_COMMAND)
                 this.remoteCommandReceived((message as CommandMessage).command);
-            else if (message instanceof GameStateMessage)
+            else if (message.kind === Message.KIND_GAMESTATE)
                 this.gameStateReceived((message as GameStateMessage).gameState);
             else
                 this.log.logError(`Unknown message received: ${message}`);

@@ -1,5 +1,5 @@
 import { config, CONSTS, PlayerConfig } from "../../config";
-import { GameState, GameStateMachine, PlanckGameState } from "../../model";
+import { GameState, GameStateMachine, PlanckGameState, PlanckGameStateUtils } from "../../model";
 import { Log } from "../log/log";
 import * as planck from 'planck-js';
 
@@ -10,7 +10,8 @@ export class PlanckGameStateMachine implements GameStateMachine {
 
     buildInitialGameState(): GameState {
         const world = this.createPlanckWorld();
-        return new PlanckGameState(0, world);
+        const bodies = PlanckGameStateUtils.extractBodies(world);
+        return new PlanckGameState(0, [], world, bodies);
     }
 
     compute(gs: GameState): void {

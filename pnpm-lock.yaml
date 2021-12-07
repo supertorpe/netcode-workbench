@@ -3,11 +3,14 @@ lockfileVersion: 5.3
 specifiers:
   '@fortawesome/fontawesome-free': ^5.15.4
   '@types/angular': ^1.8.3
+  '@types/node': ^16.11.11
   '@types/streamsaver': ^2.0.1
   '@vitejs/plugin-legacy': ^1.6.3
   angular: ^1.8.2
+  cbor-x: ^0.9.4
   jspanel4: ^4.13.0
   mini.css: ^3.0.1
+  msgpackr: ^1.5.1
   planck-js: ^0.3.31
   streamsaver: ^2.0.5
   typescript: ^4.5.2
@@ -16,13 +19,16 @@ specifiers:
 dependencies:
   '@fortawesome/fontawesome-free': 5.15.4
   angular: 1.8.2
+  cbor-x: 0.9.4
   jspanel4: 4.13.0
   mini.css: 3.0.1
+  msgpackr: 1.5.1
   planck-js: 0.3.31
   streamsaver: 2.0.5
 
 devDependencies:
   '@types/angular': 1.8.3
+  '@types/node': 16.11.11
   '@types/streamsaver': 2.0.1
   '@vitejs/plugin-legacy': 1.6.3_vite@2.6.14
   typescript: 4.5.2
@@ -45,6 +51,10 @@ packages:
     resolution: {integrity: sha512-vgc5Z+TD07DT7NEUjFm6XMp0kEbGXIa95XmOL5IiHXR9LdrJpcdDh3jl1nCuZbWyzFn5/1OqtMfomcnA1sUFXQ==}
     dev: true
 
+  /@types/node/16.11.11:
+    resolution: {integrity: sha512-KB0sixD67CeecHC33MYn+eYARkqTheIRNuu97y2XMjR7Wu3XibO1vaY6VBV6O/a89SPI81cEUIYT87UqUWlZNw==}
+    dev: true
+
   /@types/streamsaver/2.0.1:
     resolution: {integrity: sha512-I49NtT8w6syBI3Zg3ixCyygTHoTVMY0z2TMRcTgccdIsVd2MwlKk7ITLHLsJtgchUHcOd7QEARG9h0ifcA6l2Q==}
     dev: true
@@ -65,6 +75,21 @@ packages:
 
   /angular/1.8.2:
     resolution: {integrity: sha512-IauMOej2xEe7/7Ennahkbb5qd/HFADiNuLSESz9Q27inmi32zB0lnAsFeLEWcox3Gd1F6YhNd1CP7/9IukJ0Gw==}
+    dev: false
+
+  /cbor-extract/0.3.2:
+    resolution: {integrity: sha512-euTSudP3MORNR9+DLDY6seMBZ5EA32CLdobmN5IjmU00zZDnim1zSZZAVrNubKfoBFhckDJFJXSx6zOLNbIYqw==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.15.0
+      node-gyp-build: 4.3.0
+    dev: false
+    optional: true
+
+  /cbor-x/0.9.4:
+    resolution: {integrity: sha512-OfUuF9UvhI5MuaCAJ0Sp3LEdwAYyJS5cqYQBi5WBCJbgVxBUMIrRAScWypILG7+hMPUryPpZxIncE7F5T6C1mg==}
+    optionalDependencies:
+      cbor-extract: 0.3.2
     dev: false
 
   /core-js/3.19.2:
@@ -271,11 +296,37 @@ packages:
     resolution: {integrity: sha512-FmuuBL0wuyDO1UA66TkAo8w2RxxuHmNPaUqUHcYlHtM9CJkrscQaNAJ/ParEahYFwtZOSgfEA7flbMoSPkzrPA==}
     dev: false
 
+  /msgpackr-extract/1.0.15:
+    resolution: {integrity: sha512-vgJgzFva0/4/mt84wXf3CRCDPHKqiqk5t7/kVSjk/V2IvwSjoStHhxyq/b2+VrWcch3sxiNQOJEWXgI86Fm7AQ==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.15.0
+      node-gyp-build: 4.3.0
+    dev: false
+    optional: true
+
+  /msgpackr/1.5.1:
+    resolution: {integrity: sha512-I1CXFG8BYYSeIhtDlHpUVMsdDiyvP9JAh1d9QoBnkPx3ETPeH/1lR14hweM9GETs09wCWlaOyhtXxIc9boxAAA==}
+    optionalDependencies:
+      msgpackr-extract: 1.0.15
+    dev: false
+
+  /nan/2.15.0:
+    resolution: {integrity: sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==}
+    dev: false
+    optional: true
+
   /nanoid/3.1.30:
     resolution: {integrity: sha512-zJpuPDwOv8D2zq2WRoMe1HsfZthVewpel9CAvTfc/2mBD1uUT/agc5f7GHGWXlYkFvi1mVxe4IjvP2HNrop7nQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /node-gyp-build/4.3.0:
+    resolution: {integrity: sha512-iWjXZvmboq0ja1pUGULQBexmxq8CV4xBhX7VDOTbL7ZR4FOowwY/VOtRxBN/yKxmdGoIp4j5ysNT4u3S2pDQ3Q==}
+    hasBin: true
+    dev: false
+    optional: true
 
   /path-parse/1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}

@@ -1,11 +1,12 @@
 import { NetcodeConfig } from '../../config';
 import { NetworkConn, NetworkInterface } from '../network';
-import { Log } from '../log';
+import { Log, NetworkLog } from '../log';
 import { EventEmitter } from '../../commons';
 import { GameStateLog, GameStateMachine } from '../../model';
 import { BaseNetCode, INetCode, NetCodeFactory } from '../../netcode';
 import { Renderer, PlanckRenderer, SimpleRenderer } from '../renderers';
 import { PlanckGameStateMachine, SimpleGameStateMachine } from '../gamestate-machine';
+import { SerializerFactory } from '../serializers';
 
 export class Device {
 
@@ -30,6 +31,7 @@ export class Device {
     }
 
     get log(): Log { return this._log; }
+    get trafficLog(): NetworkLog { return this._networkInterface.trafficLog; }
     get deviceUpdatedEmitter(): EventEmitter<void> { return this._deviceUpdatedEmitter; }
     get gameStateHistory(): GameStateLog[] { return this._gameStateHistory; }
     get interpolation(): boolean { return this._interpolation; }
@@ -37,14 +39,14 @@ export class Device {
     get debugBoxes(): boolean { return this.renderer.debugBoxes; }
     set debugBoxes(value: boolean) { this.renderer.debugBoxes = value; }
 
-    public connect(device: Device,
+    public connect(device: Device, serializerName: string,
         minSendLatency: number, maxSendLatency: number, packetSendLoss: number,
         minReceiveLatency: number, maxReceiveLatency: number, packetReceiveLoss: number) {
-        const conn1 = new NetworkConn(this.playerId, this._log);
+        const conn1 = new NetworkConn(this._networkInterface, this.playerId, this._log, SerializerFactory.build(serializerName, this.log));
         conn1.minLatency = minSendLatency;
         conn1.maxLatency = maxSendLatency;
         conn1.packetLoss = packetSendLoss;
-        const conn2 = new NetworkConn(device.playerId, device._log);
+        const conn2 = new NetworkConn(device._networkInterface, device.playerId, device._log, SerializerFactory.build(serializerName, device.log));
         conn2.minLatency = minReceiveLatency;
         conn2.maxLatency = maxReceiveLatency;
         conn2.packetLoss = packetReceiveLoss;
@@ -104,8 +106,8 @@ export class Device {
 
     public stop() {
         this.running = false;
+        this._networkInterface.removeListeners();
         this._networkInterface.closeConnections();
-        this._networkInterface.resetEmitters();
     }
 
     public gameStateHistoryLog(): string {

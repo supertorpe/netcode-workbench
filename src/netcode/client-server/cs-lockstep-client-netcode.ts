@@ -1,4 +1,4 @@
-import { Command, CommandMessage, GameState, GameStateLog } from "../../model";
+import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, SimpleGameState, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../base-netcode";
 
 export class CSLockstepClientNetCode extends BaseNetCode {
@@ -10,8 +10,8 @@ export class CSLockstepClientNetCode extends BaseNetCode {
         let result = null;
         if (this.lastTickReturned < this._currentTick && this._gameState) {
             this.lastTickReturned = this._currentTick;
-            this.log.logInfo(this._gameState.toString());
-            result = this._gameState.toLog();
+            this.log.logInfo(SimpleGameStateUtils.toString(this._gameState as SimpleGameState));
+            result = SimpleGameStateUtils.toLog(this._gameState as SimpleGameState);
         }
         return result;
     }
@@ -20,7 +20,7 @@ export class CSLockstepClientNetCode extends BaseNetCode {
         if (this.localCommandTick < this._currentTick) {
             this.localCommandTick = this._currentTick;
             const command = new Command(this._currentTick, playerId, commandValue);
-            this.log.logInfo(`sending local command: ${command.toFullString()}`);
+            this.log.logInfo(`sending local command: ${CommandUtils.toFullString(command)}`);
             this.net.broadcast(new CommandMessage(command));
           }
     }
@@ -30,7 +30,7 @@ export class CSLockstepClientNetCode extends BaseNetCode {
     }
 
     public gameStateReceived(gameState: GameState): void {
-        this.log.logInfo(`received gamestate: ${gameState.toLog()}`);
+        this.log.logInfo(`received gamestate: ${SimpleGameStateUtils.toLog(this._gameState as SimpleGameState)}`);
         if (gameState.tick < this._currentTick) {
             this.log.logInfo(`ignoring old gamestate: ${gameState.tick}`);
             return;

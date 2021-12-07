@@ -1,5 +1,5 @@
 import { config, PlayerConfig } from "../../config";
-import { PlanckGameState } from "../../model";
+import { PlanckGameState, PlanckGameStateUtils } from "../../model";
 import { BaseNetCode } from "../../netcode";
 import { currentTimestamp } from "../../commons";
 import { Log } from "../log";
@@ -111,7 +111,7 @@ export class PlanckRenderer extends Renderer {
             y = body.getPosition().y + body.getLinearVelocity().y * interpolationInfo.elapsed;
         } else {
             // interpolation
-            nextBody = (interpolationInfo.nextGameState as PlanckGameState).bodyFromPlayer((<PlayerConfig>body.getUserData()).id);
+            nextBody = PlanckGameStateUtils.bodyFromPlayer(interpolationInfo.nextGameState as PlanckGameState, (<PlayerConfig>body.getUserData()).id);
             if (nextBody) {
                 const pos0 = body.getPosition();
                 const pos1 = nextBody.getPosition();

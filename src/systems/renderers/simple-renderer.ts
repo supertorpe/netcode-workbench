@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { SimpleBodyState, SimpleGameState } from "../../model";
+import { SimpleBodyState, SimpleGameState, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../../netcode";
 import { currentTimestamp } from "../../commons";
 import { Log } from "../log";
@@ -106,7 +106,7 @@ export class SimpleRenderer extends Renderer {
             y = body.posY + body.velY * interpolationInfo.elapsed;
         } else {
             // interpolation
-            nextBody = (interpolationInfo.nextGameState as SimpleGameState).bodyFromPlayer(body.id);
+            nextBody = SimpleGameStateUtils.bodyFromPlayer(interpolationInfo.nextGameState as SimpleGameState, body.id);
             if (nextBody) {
                 /*
                 x = (pos0.x + (interpolationInfo.elapsed * (pos1.x - pos0.x)) / interpolationInfo.tickTimeDiff);

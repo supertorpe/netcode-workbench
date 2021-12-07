@@ -1,55 +1,57 @@
 import * as planck from 'planck-js';
 import * as Serializer from 'planck-js/lib/serializer';
 import { config, PlayerConfig } from '../config';
-import { CommandLog, GameState, GameStateLog, PlayerLog } from './game-state';
+import { Command, CommandUtils } from './command';
+import { CommandLog, GameState, GameStateLog, GameStateUtils, PlayerLog } from './game-state';
 import { SimpleBodyState, SimpleGameState } from './simple-game-state';
 
 export class PlanckGameState extends GameState {
+    constructor(public tick: number, public commands: Command[],
+        public world: planck.World,
+        public bodies: planck.Body[]) {
+        super(tick, commands);
+    }
+}
 
-    private _world: planck.World;
-    private _bodies: planck.Body[];
+export class PlanckGameStateUtils extends GameStateUtils {
 
-    constructor(tick: number, world: planck.World) {
-        super(tick);
-        this._world = world;
-        this._bodies = [];
+    public static extractBodies(world: planck.World): planck.Body[] {
+        const result = [];
         for (let b = world.getBodyList(); b; b = b.getNext()) {
-            this._bodies.unshift(b);
+            result.unshift(b);
         }
+        return result;
     }
 
-    get world(): planck.World { return this._world; }
-    get bodies(): planck.Body[] { return this._bodies; }
-
-    public bodyFromPlayer(playerId: number): planck.Body | undefined {
-        return this._bodies.find(body => (<PlayerConfig>body.getUserData()).id === playerId);
+    public static bodyFromPlayer(planckGameState: PlanckGameState, playerId: number): planck.Body | undefined {
+        return planckGameState.bodies.find(body => (<PlayerConfig>body.getUserData()).id === playerId);
     }
 
-    public toString(): string {
+    public static toString(planckGameState: PlanckGameState): string {
         let bodiesStr = '';
-        this._bodies.forEach((body) => {
+        planckGameState.bodies.forEach((body) => {
             if (!body.isStatic() && body.getUserData()) {
                 bodiesStr += `    P${(<PlayerConfig>body.getUserData()).id} x=${body.getPosition().x * config.physics.worldScale} y=${body.getPosition().y * config.physics.worldScale}\n`;
             }
         });
-        return `\nGameState tick: ${this._tick}
+        return `\nGameState tick: ${planckGameState.tick}
   bodies:
-${bodiesStr}  commands:
-    ${this._commands.join('\n    ')}`;
+${bodiesStr}  ${planckGameState.commands.length>0?"commands:":""}
+    ${CommandUtils.arrayToString(planckGameState.commands)}`;
     }
 
-    public clone(): GameState {
-        const world = this.cloneWorld(this._world, this._bodies);
-        /*this._bodies = [];
-        for (let b = world.getBodyList(); b; b = b.getNext()) {
-            this._bodies.unshift(b);
-        }*/
-        const result = new PlanckGameState(this._tick, world);
-        this._commands.forEach(command => result.commands.push(command.clone(false)));
+    public static clone(planckGameState: PlanckGameState): PlanckGameState {
+        const world = PlanckGameStateUtils.cloneWorld(planckGameState.world, planckGameState.bodies);
+        const result = new PlanckGameState(
+            planckGameState.tick,
+            CommandUtils.cloneArray(planckGameState.commands),
+            world,
+            PlanckGameStateUtils.extractBodies(world)
+            );
         return result;
     }
 
-    private cloneWorld(world: planck.World, bodies: planck.Body[]): planck.World {
+    private static cloneWorld(world: planck.World, bodies: planck.Body[]): planck.World {
         const result = Serializer.fromJson(Serializer.toJson(world)) as planck.World;
         // hack: planck serialization does not dump userData
         const resultBodies = [];
@@ -63,9 +65,9 @@ ${bodiesStr}  commands:
         return result;
     }
 
-    public toLog(): GameStateLog {
+    public static toLog(planckGameState: PlanckGameState): GameStateLog {
         const players: PlayerLog[] = [];
-        this._bodies.forEach((body) => {
+        planckGameState.bodies.forEach((body) => {
             if (!body.isStatic() && body.getUserData()) {
                 let playerConfig = <PlayerConfig>body.getUserData();
                 players.push(new PlayerLog(playerConfig.id, body.getPosition().x * config.physics.worldScale, body.getPosition().y * config.physics.worldScale));
@@ -73,16 +75,16 @@ ${bodiesStr}  commands:
         });
         players.sort((a, b) => a.id > b.id ? 1 : -1);
         const commands: CommandLog[] = [];
-        this._commands.forEach((command) => {
+        planckGameState.commands.forEach((command) => {
             commands.push(new CommandLog(command.playerId, command.value));
         });
         commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-        return new GameStateLog(this._tick, players, commands);
+        return new GameStateLog(planckGameState.tick, players, commands);
     }
 
-    public buildSimpleGameState() : SimpleGameState {
+    public static buildSimpleGameState(planckGameState: PlanckGameState) : SimpleGameState {
         const bodies: SimpleBodyState[] = [];
-        this._bodies.forEach((body) => {
+        planckGameState.bodies.forEach((body) => {
             if (!body.isStatic()) {
                 let playerConfig = <PlayerConfig>body.getUserData();
                 const simpleBody = new SimpleBodyState(
@@ -105,7 +107,7 @@ ${bodiesStr}  commands:
                 bodies.push(simpleBody);
             }
         });
-        return new SimpleGameState(this.tick, bodies);
+        return new SimpleGameState(planckGameState.tick, [], bodies);
     }
 }
 

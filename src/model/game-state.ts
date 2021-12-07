@@ -20,38 +20,27 @@ export class GameStateLog {
     public toString(): string {
         return `tick: ${this.tick}
   ${this.players.join('\n  ')}
-  Commands: ${this.commands.join(' ')}`;
+  ${this.commands.length>0?"Commands:":""} ${this.commands.join(' ')}`;
     }
 }
 
-export abstract class GameState {
-    
-    protected _tick: number;
-    protected _commands: Command[];
+export class GameState {
+    constructor(public tick: number, public commands: Command[]) { }
+}
 
-    constructor(tick: number) {
-        this._tick = tick;
-        this._commands = [];
+export abstract class GameStateUtils {
+
+    public static incTick(gameState: GameState) {
+        gameState.tick++;
     }
 
-    get tick(): number { return this._tick; }
-    get commands(): Command[] { return this._commands; }
-
-    public incTick() {
-        this._tick++;
+    public static commandFromPlayer(gameState: GameState, playerId: number): Command | undefined {
+        return gameState.commands.find(command => command.playerId === playerId);
     }
 
-    public commandFromPlayer(playerId: number): Command | undefined {
-        return this._commands.find(command => command.playerId === playerId);
+    public static clearCommands(gameState: GameState) {
+        gameState.commands = [];
     }
-
-    public clearCommands() {
-        this._commands = [];
-    }
-
-    public abstract toLog(): GameStateLog;
-
-    public abstract clone(): GameState;
 
 }
 

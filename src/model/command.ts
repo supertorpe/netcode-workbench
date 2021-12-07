@@ -1,28 +1,25 @@
 export class Command {
+    constructor(public tick: number, public playerId: number, public value: number) { }
+}
 
-    private _tick: number;
-    private _playerId: number;
-    private _value: number;
-
-    constructor(tick: number, playerId: number, value: number) {
-        this._tick = tick;
-        this._playerId = playerId;
-        this._value = value;
+export class CommandUtils {
+    public static clone(command: Command, incTick: boolean): Command {
+        return new Command(command.tick + (incTick ? 1 : 0), command.playerId, command.value);
     }
-
-    get tick(): number { return this._tick; }
-    get playerId(): number { return this._playerId; }
-    get value(): number { return this._value; }
-
-    public clone(incTick: boolean): Command {
-        return new Command(this._tick + (incTick ? 1 : 0), this._playerId, this._value);
+    public static cloneArray(commands: Command[]): Command[] {
+        return commands.map((command) => { return CommandUtils.clone(command,false); });
     }
-
-    public toString(): string {
-        return `P${this._playerId}:${this._value}`;
+    public static toString(command: Command): string {
+        return `P${command.playerId}:${command.value}`;
     }
-
-    public toFullString(): string {
-        return `tick ${this._tick} P${this._playerId}:${this._value}`;
+    public static arrayToString(commands: Command[]): string {
+        let result = '';
+        commands.forEach((command) => {
+            result += `P${command.playerId}:${command.value} `;
+        });
+        return result;
+    }
+    public static toFullString(command: Command): string {
+        return `tick ${command.tick} P${command.playerId}:${command.value}`;
     }
 }
