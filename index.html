@@ -253,6 +253,8 @@
             data-ng-class="::trace.level == 'INFO' ? 'log_info' : trace.level == 'WARN' ? 'log_warn' : 'log_error'">
             {{::trace.timestamp | date: 'HH:mm:ss.sss'}} {{::trace.text}}</p>
     </div>
+    <!-- TRAFFIC CHART -->
+    <div id="trafficChart"></div>
     <div data-ng-if="info.showSpinner" class="loading"><div class="loader"></div></div>
     <script type="module" src="/src/main.ts"></script>
 </body>

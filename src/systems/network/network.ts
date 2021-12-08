@@ -54,6 +54,7 @@ export class NetworkInterface {
 
     public closeConnections() {
         this.connections.forEach((conn) => {
+            conn.close();
             if (conn.peer.peerId === 0) {
                 this.log.logInfo(`Disconnected from Server`);
             } else {
@@ -69,7 +70,6 @@ export class NetworkInterface {
         this._disconnectionEmitter.removeListeners();
         this._messageSentEmitter.removeListeners();
         this._messageReceivedEmitter.removeListeners();
-        this._trafficlog.removeListeners();
     }
 
     public broadcast(message: Message) {
@@ -83,6 +83,7 @@ export class NetworkInterface {
 
 export class NetworkConn {
 
+    private _closed = true;
     private _peer!: NetworkConn;
     private _minLatency: number = 0;
     private _maxLatency: number = 0;
@@ -110,9 +111,11 @@ export class NetworkConn {
     public connect(peer: NetworkConn) {
         this._peer = peer;
         this._connectionEmitter.notify(peer);
+        this._closed = false;
     }
 
     public send(message: Message) {
+        if (this._closed) return;
         message.timestampOrigin = currentTimestamp();
         message.origin = this.peerId;
         message.destination = this._peer.peerId;
@@ -137,10 +140,15 @@ export class NetworkConn {
     }
 
     public receive(messageBuffer: ArrayBuffer) {
+        if (this._closed) return;
         const message: Message = this.serializer.decode(messageBuffer);
         message.timestampDestination = currentTimestamp();
         this.intf.trafficLog.logIn(message.timestampDestination, messageBuffer.byteLength);
         this._messageReceivedEmitter.notify(message);
+    }
+
+    public close() {
+        this._closed = true;
     }
 
 }

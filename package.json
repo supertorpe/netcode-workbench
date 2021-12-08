@@ -22,7 +22,8 @@
     "mini.css": "^3.0.1",
     "msgpackr": "^1.5.1",
     "planck-js": "^0.3.31",
-    "streamsaver": "^2.0.5"
+    "streamsaver": "^2.0.5",
+    "uplot": "^1.6.17"
   },
   "devDependencies": {
     "@types/angular": "^1.8.3",

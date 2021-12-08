@@ -5,10 +5,12 @@
 ## Features
 - Two players with up to ten NPCs
 - Network abstraction with latency and packet loss simulation
+- Several serialization mechanisms: JSON, CBOR, MessagePack
 - Configurable tick duration
 - Parametrizable smoothing (interpolation/extrapolation)
 - Optionally draw debug boxes to see smoothing effect
 - Realtime and downloadable logs and game state history
+- Network Traffic Chart
 - Easily extensible inheriting from the BaseNetCode class
 - Externalizable netcodes
 - Simple game simulation with planck-js physics engine
@@ -62,6 +64,9 @@ Following software and resources has been used:
 * [TypeScript](https://www.typescriptlang.org): strongly typed programming language that builds on JavaScript
 * [AngularJS](https://angularjs.org): frontend web framework
 * [jsPanel v4.x](https://www.jspanel.de): JavaScript library to create highly configurable floating panels, modals, tooltips...
+* [uPlot](https://github.com/leeoniya/uPlot): a small, fast chart for time series, lines, areas, ohlc & bars
+* [cbor-x](https://github.com/kriszyp/cbor-x): ultra-fast CBOR encoder/decoder with extensions for records and structural cloning
+* [msgpackr](https://github.com/kriszyp/msgpackr): ultra-fast MessagePack implementation with extension for record and structural cloning
 * [mini.css](https://minicss.org): minimal, responsive, style-agnostic
 CSS framework
 * [Vite](https://vitejs.dev): build tool that aims to provide a faster and leaner development experience for modern web projects

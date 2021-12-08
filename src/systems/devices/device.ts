@@ -108,6 +108,8 @@ export class Device {
         this.running = false;
         this._networkInterface.removeListeners();
         this._networkInterface.closeConnections();
+        this._networkInterface.trafficLog.flush();
+        this._networkInterface.trafficLog.removeListeners();
     }
 
     public gameStateHistoryLog(): string {

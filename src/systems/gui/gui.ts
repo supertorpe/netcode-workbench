@@ -6,10 +6,11 @@ import '../../css/style.css';
 import { jsPanel } from 'jspanel4';
 import * as angular from 'angular';
 import { createWriteStream } from 'streamsaver';
+import uPlot from 'uplot';
 import { config, NetcodeConfig } from '../../config';
 import { ClientDevice, ServerDevice } from '../devices';
 import { BaseNetCode, INetCode } from '../../netcode';
-import { Command, CommandMessage, GameStateMessage } from '../../model';
+import { Command, CommandMessage, CommandUtils, GameStateMessage, PlanckGameStateUtils, SimpleGameStateUtils } from '../../model';
 import { currentTimestamp } from '../../commons';
 
 class Gui {
@@ -30,6 +31,8 @@ class Gui {
     private panelCanvasS: any;
     private panelGamestatesS: any;
     private panelLogS: any;
+    private panelTrafficChart: any;
+    private uplotChartPanel: any;
 
     constructor() {
         this.deviceServer = new ServerDevice(
@@ -63,6 +66,7 @@ class Gui {
 
         // CONTROL PANEL //
         this.panelControl = jsPanel.create({
+            id: 'panelControl',
             headerTitle: 'Control Panel',
             theme: 'dimgrey',
             headerControls: { close: 'remove', size: 'xs' },
@@ -74,6 +78,7 @@ class Gui {
         // PLAYER 1 //
         // GameStates
         this.panelGamestates1 = jsPanel.create({
+            id: 'panelGamestates1',
             headerTitle: 'Player 1 Game States',
             theme: 'DarkSlateBlue',
             contentOverflow: 'auto',
@@ -85,6 +90,7 @@ class Gui {
         });
         // Canvas
         this.panelCanvas1 = jsPanel.create({
+            id: 'panelCanvas1',
             headerTitle: 'Player 1 Canvas',
             theme: 'DarkSlateBlue',
             contentOverflow: 'hide',
@@ -95,6 +101,7 @@ class Gui {
         });
         // Logs
         this.panelLog1 = jsPanel.create({
+            id: 'panelLog1',
             headerTitle: 'Player 1 Logs',
             theme: 'DarkSlateBlue',
             contentOverflow: 'auto',
@@ -107,6 +114,7 @@ class Gui {
         // PLAYER 2 //
         // GameStates
         this.panelGamestates2 = jsPanel.create({
+            id: 'panelGamestates2',
             headerTitle: 'Player 2 Game States',
             theme: 'OliveDrab',
             contentOverflow: 'auto',
@@ -117,6 +125,7 @@ class Gui {
         });
         // Canvas
         this.panelCanvas2 = jsPanel.create({
+            id: 'panelCanvas2',
             headerTitle: 'Player 2 Canvas',
             theme: 'OliveDrab',
             contentOverflow: 'hide',
@@ -127,6 +136,7 @@ class Gui {
         });
         // Logs
         this.panelLog2 = jsPanel.create({
+            id: 'panelLog2',
             headerTitle: 'Player 2 Logs',
             theme: 'OliveDrab',
             contentOverflow: 'auto',
@@ -139,6 +149,7 @@ class Gui {
         // SERVER //
         // GameStates
         this.panelGamestatesS = jsPanel.create({
+            id: 'panelGamestatesS',
             headerTitle: 'Server Game States',
             theme: 'black',
             contentOverflow: 'auto',
@@ -149,6 +160,7 @@ class Gui {
         });
         // Canvas
         this.panelCanvasS = jsPanel.create({
+            id: 'panelCanvasS',
             headerTitle: 'Server "Canvas"',
             theme: 'black',
             contentOverflow: 'hide',
@@ -159,6 +171,7 @@ class Gui {
         });
         // Logs
         this.panelLogS = jsPanel.create({
+            id: 'panelLogS',
             headerTitle: 'Server Logs',
             theme: 'black',
             contentOverflow: 'auto',
@@ -167,6 +180,19 @@ class Gui {
             position: { my: 'left-top', at: 'left-top', offsetX: '350px', offsetY: '75%' },
             content: document.getElementById('serverLogs')
         });
+
+        // NETWORK TRAFFIC //
+        this.panelTrafficChart = jsPanel.create({
+            id: 'panelTrafficChart',
+            headerTitle: 'Network Traffic',
+            theme: 'dimgrey',
+            contentOverflow: 'auto',
+            headerControls: { close: 'remove', size: 'xs' },
+            panelSize: { width: 'calc(100vw - 25em)', height: 'calc(100vh - 250px - 4.5em)' },
+            position: { my: 'left-top', at: 'left-top', offsetX: '1000vw', offsetY: '1000vh' },
+            content: document.getElementById('trafficChart')
+        });
+        this.uplotChartPanel = document.querySelector('#panelTrafficChart > div.jsPanel-content') as HTMLDivElement;
     }
 
     private resetLayout() {
@@ -283,7 +309,79 @@ class Gui {
                     logsServer: [],
                     gamestatesPlayer1: [],
                     gamestatesPlayer2: [],
-                    gamestatesServer: []
+                    gamestatesServer: [],
+                    uplot: undefined,
+                    uplotP2POpts: {
+                        width: this.uplotChartPanel.clientWidth,
+                        height: this.uplotChartPanel.clientHeight - 50,
+                        pxAlign: 0,
+                        scales: {
+                            x: {
+                                time: false,
+                            },
+                        },
+                        series: [
+                            {
+                                label: "(sec)"
+                            },
+                            {
+                                label: "P1 In",
+                                stroke: "#483D8B",
+                            },
+                            {
+                                label: "P1 Out",
+                                stroke: "blue",
+                            },
+                            {
+                                label: "P2 In",
+                                stroke: "#6B8E23",
+                            },
+                            {
+                                label: "P2 Out",
+                                stroke: "green",
+                            }
+                        ]
+                    },
+                    uplotCSOpts: {
+                        width: this.uplotChartPanel.clientWidth,
+                        height: this.uplotChartPanel.clientHeight - 50,
+                        pxAlign: 0,
+                        scales: {
+                            x: {
+                                time: false,
+                            },
+                        },
+                        series: [
+                            {
+                                label: "(sec)"
+                            },
+                            {
+                                label: "P1 In",
+                                stroke: "#483D8B",
+                            },
+                            {
+                                label: "P1 Out",
+                                stroke: "blue",
+                            },
+                            {
+                                label: "P2 In",
+                                stroke: "#6B8E23",
+                            },
+                            {
+                                label: "P2 Out",
+                                stroke: "green",
+                            },
+                            {
+                                label: "SRV In",
+                                stroke: "black",
+                            },
+                            {
+                                label: "SRV Out",
+                                stroke: "gray",
+                            }
+                        ]
+                    },
+                    uplotData: []
                 };
 
                 const p2pmode = $scope.info.algorithm.type === 'p2p';
@@ -456,18 +554,36 @@ class Gui {
                     this.resetLayout();
                 };
 
+                document.addEventListener('jspanelresizestop', (event:any) => {
+                    if (event.panel.id === 'panelTrafficChart') {
+                        $scope.info.uplot.setSize({
+                            width: this.uplotChartPanel.clientWidth,
+                            height: this.uplotChartPanel.clientHeight - 50
+                        });
+                    }
+                }, false);
+
+                $scope.showTrafficChart = () => {
+                    $scope.info.uplot = new uPlot(this.p2pmode ? $scope.info.uplotP2POpts : $scope.info.uplotCSOpts, $scope.info.uplotData, this.uplotChartPanel);
+                    this.panelTrafficChart.reposition({ my: 'left-top', at: 'left-top', offsetX: '23em', offsetY: 'calc(250px + 4.5em)' });
+                    this.panelTrafficChart.resize({ width: 'calc(100vw - 25em)', height: 'calc(100vh - 250px - 4.5em)' });
+                    this.panelTrafficChart.front();
+                };
+
                 $scope.stop = () => {
                     $scope.info.showSpinner = true;
-                    $timeout(() => {  
+                    $timeout(() => {
                         this.deviceServer.stop();
                         this.devicePlayer1.stop();
                         this.devicePlayer2.stop();
                         $scope.info.btnStopEnabled = false;
                         $scope.info.btnPlayEnabled = true;
                         $scope.info.playing = false;
+                        $scope.showTrafficChart();
                         $timeout(() => {  $scope.info.showSpinner = false; });
                      });
                 };
+
                 $scope.play = async () => {
                     if ($scope.info.algorithm.type === 'custom') {
                         if (!$scope.info.algorithmUrl) {
@@ -483,6 +599,9 @@ class Gui {
                             (<any>window).Command = Command;
                             (<any>window).CommandMessage = CommandMessage;
                             (<any>window).GameStateMessage = GameStateMessage;
+                            (<any>window).CommandUtils = CommandUtils;
+                            (<any>window).SimpleGameStateUtils = SimpleGameStateUtils;
+                            (<any>window).PlanckGameStateUtils = PlanckGameStateUtils;
                             // import external module
                             const { type, name, ClientNetCode, ServerNetCode } = await import(/* @vite-ignore */`data:text/javascript;charset=utf-8,${encodeURIComponent(content)}`);
                             const algorithm =  new NetcodeConfig(name, type);
@@ -500,30 +619,149 @@ class Gui {
                         $scope.internalPlay($scope.info.algorithm, null, null);
                     }
                 }
+                
                 $scope.internalPlay = (algorithm: NetcodeConfig, ClientNetCodeClass: INetCode | null, ServerNetCodeClass: INetCode | null) => {
                     // cleanup
                     this.deviceServer.reset();
                     this.devicePlayer1.reset();
                     this.devicePlayer2.reset();
+                    // traffic log
+                    if ($scope.info.uplot) {
+                        $scope.info.uplot.destroy();
+                        $scope.info.uplot = undefined;
+                    }
+                    this.panelTrafficChart.reposition({ my: 'left-top', at: 'left-top', offsetX: '1000vw', offsetY: '1000vh' });
+                    $scope.info.uplotData = this.p2pmode ? [ [],[],[],[],[] ] : [ [],[],[],[],[],[],[] ];
+                    let firstTimestamp = 0;
                     this.devicePlayer1.trafficLog.incomingEmitter.addEventListener((trace) => {
-                        this.devicePlayer1.log.logInfo(`incoming ${trace.size} bytes`);
+                        this.devicePlayer1.log.logInfo(`incoming ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(trace.size);
+                            $scope.info.uplotData[2].push(0);
+                            $scope.info.uplotData[3].push(0);
+                            $scope.info.uplotData[4].push(0);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(0);
+                                $scope.info.uplotData[6].push(0);
+                            }
+                        } else {
+                            $scope.info.uplotData[1][idx] = trace.size;
+                        }
                     });
                     this.devicePlayer1.trafficLog.outgoingEmitter.addEventListener((trace) => {
-                        this.devicePlayer1.log.logInfo(`outgoing ${trace.size} bytes`);
+                        this.devicePlayer1.log.logInfo(`outgoing ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(0);
+                            $scope.info.uplotData[2].push(trace.size);
+                            $scope.info.uplotData[3].push(0);
+                            $scope.info.uplotData[4].push(0);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(0);
+                                $scope.info.uplotData[6].push(0);
+                            }
+                        } else {
+                            $scope.info.uplotData[2][idx] = trace.size;
+                        }
                     });
                     this.devicePlayer2.trafficLog.incomingEmitter.addEventListener((trace) => {
-                        this.devicePlayer2.log.logInfo(`incoming ${trace.size} bytes`);
+                        this.devicePlayer2.log.logInfo(`incoming ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(0);
+                            $scope.info.uplotData[2].push(0);
+                            $scope.info.uplotData[3].push(trace.size);
+                            $scope.info.uplotData[4].push(0);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(0);
+                                $scope.info.uplotData[6].push(0);
+                            }
+                        } else {
+                            $scope.info.uplotData[3][idx] = trace.size;
+                        }
                     });
                     this.devicePlayer2.trafficLog.outgoingEmitter.addEventListener((trace) => {
-                        this.devicePlayer2.log.logInfo(`outgoing ${trace.size} bytes`);
+                        this.devicePlayer2.log.logInfo(`outgoing ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(0);
+                            $scope.info.uplotData[2].push(0);
+                            $scope.info.uplotData[3].push(0);
+                            $scope.info.uplotData[4].push(trace.size);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(0);
+                                $scope.info.uplotData[6].push(0);
+                            }
+                        } else {
+                            $scope.info.uplotData[4][idx] = trace.size;
+                        }
                     });
                     this.deviceServer.trafficLog.incomingEmitter.addEventListener((trace) => {
-                        this.deviceServer.log.logInfo(`incoming ${trace.size} bytes`);
+                        this.deviceServer.log.logInfo(`incoming ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(0);
+                            $scope.info.uplotData[2].push(0);
+                            $scope.info.uplotData[3].push(0);
+                            $scope.info.uplotData[4].push(0);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(trace.size);
+                                $scope.info.uplotData[6].push(0);
+                            }
+                        } else {
+                            $scope.info.uplotData[5][idx] = trace.size;
+                        }
                     });
                     this.deviceServer.trafficLog.outgoingEmitter.addEventListener((trace) => {
-                        this.deviceServer.log.logInfo(`outgoing ${trace.size} bytes`);
+                        this.deviceServer.log.logInfo(`outgoing ${trace.timestamp} ${trace.size} bytes`);
+                        if (firstTimestamp === 0) {
+                            firstTimestamp = trace.timestamp;
+                        }
+                        const valX = trace.timestamp - firstTimestamp;
+                        const idx = $scope.info.uplotData[0].indexOf(valX);
+                        if (idx === -1) {
+                            $scope.info.uplotData[0].push(valX);
+                            $scope.info.uplotData[1].push(0);
+                            $scope.info.uplotData[2].push(0);
+                            $scope.info.uplotData[3].push(0);
+                            $scope.info.uplotData[4].push(0);
+                            if (!this.p2pmode) {
+                                $scope.info.uplotData[5].push(0);
+                                $scope.info.uplotData[6].push(trace.size);
+                            }
+                        } else {
+                            $scope.info.uplotData[6][idx] = trace.size;
+                        }
                     });
-                    if (algorithm.type === 'p2p') {
+
+                    // connect and play
+                    if (this.p2pmode) {
                         this.devicePlayer1.connect(this.devicePlayer2, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                         this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
@@ -571,7 +809,7 @@ ${this.devicePlayer2.gameStateHistoryLog()}
 PLAYER 2 LOGS
 -------------
 ${this.devicePlayer2.log}`;
-                    if ($scope.info.algorithm.type !== 'p2p') {
+                    if (!this.p2pmode) {
                         data +=
 `-----------------
 SERVER GAME STATES
