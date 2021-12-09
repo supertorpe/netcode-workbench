@@ -1,9 +1,9 @@
 import { Command } from "./command";
 
 export class PlayerLog {
-    constructor(public id: number, public x: number, public y: number) { }
+    constructor(public id: number, public x: number, public y: number, public score: number) { }
     public toString(): string {
-        return `P${this.id} x=${this.x} y=${this.y}`;
+        return `P${this.id} x=${this.x} y=${this.y} score=${this.score}`;
     }
 }
 export class CommandLog {

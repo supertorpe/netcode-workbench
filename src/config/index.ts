@@ -20,6 +20,9 @@ export class PlayerConfig {
         public x: number, public y: number, public size: number,
         public keyUp: number, public keyDown: number, public keyLeft: number, public keyRight: number) { }
 }
+export class CoinConfig {
+    constructor(public color: string, public x: number, public y: number, public size: number) { }
+}
 export class NpcConfig {
     constructor(public color: string) { }
 }
@@ -36,6 +39,7 @@ export class Config {
         public netcodes: NetcodeConfig[],
         public network: NetworkConfig,
         public players: PlayerConfig[],
+        public coin: CoinConfig,
         public npc: NpcConfig,
         public border: BorderConfig,
         public physics: PhysicsConfig

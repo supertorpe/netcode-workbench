@@ -16,6 +16,7 @@ specifiers:
   typescript: ^4.5.2
   uplot: ^1.6.17
   vite: ^2.6.14
+  xorshift: ^1.2.0
 
 dependencies:
   '@fortawesome/fontawesome-free': 5.15.4
@@ -27,6 +28,7 @@ dependencies:
   planck-js: 0.3.31
   streamsaver: 2.0.5
   uplot: 1.6.17
+  xorshift: 1.2.0
 
 devDependencies:
   '@types/angular': 1.8.3
@@ -426,3 +428,7 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  /xorshift/1.2.0:
+    resolution: {integrity: sha512-iYgNnGyeeJ4t6U11NpA/QiKy+PXn5Aa3Azg5qkwIFz1tBLllQrjjsk9yzD7IAK0naNU4JxdeDgqW9ov4u/hc4g==}
+    dev: false

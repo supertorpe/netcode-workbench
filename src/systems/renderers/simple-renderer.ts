@@ -42,6 +42,7 @@ export class SimpleRenderer extends Renderer {
                 this.drawDynamicBody(body);
             }
         });
+        this.renderScores(gameState);
     }
 
     private renderWithInterpolation() {
@@ -79,6 +80,7 @@ export class SimpleRenderer extends Renderer {
                 this.drawDynamicBodyWithInterpolation(body, interpolationInfo);
             }
         });
+        this.renderScores(gameState);
     }
 
     private drawStaticBody(body: SimpleBodyState) {
@@ -175,4 +177,12 @@ export class SimpleRenderer extends Renderer {
         //*/
     }
 
+    private renderScores(gameState: SimpleGameState) {
+        this.context.font = "16px monospace";
+        let x = 10;
+        config.players.forEach((player, index) => {
+            this.context.fillStyle = config.players[index].color;
+            this.context.fillText(`P${player.id}: ${gameState.scores[index]}`, x + (140*index), 20);
+        });
+    }
 }

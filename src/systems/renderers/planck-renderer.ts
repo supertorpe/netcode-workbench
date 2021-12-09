@@ -43,6 +43,7 @@ export class PlanckRenderer extends Renderer {
                 this.drawDynamicBody(body);
             }
         }
+        this.renderScores(gameState);
     }
 
     private renderWithInterpolation() {
@@ -80,12 +81,13 @@ export class PlanckRenderer extends Renderer {
                 this.drawDynamicBodyWithInterpolation(body, interpolationInfo);
             }
         }
+        this.renderScores(gameState);
     }
 
     private drawStaticBody(body: planck.Body) {
         let width = (<any>body.getUserData()).width;
         let height = (<any>body.getUserData()).height;
-        this.context.fillStyle = config.border.color;
+        this.context.fillStyle = (<any>body.getUserData()).color;
         this.context.fillRect(
             body.getPosition().x * config.physics.worldScale - width / 2,
             body.getPosition().y * config.physics.worldScale - height / 2,
@@ -182,6 +184,15 @@ export class PlanckRenderer extends Renderer {
         this.context.strokeStyle = player.color;
         this.context.stroke();
         //*/
+    }
+
+    private renderScores(gameState: PlanckGameState) {
+        this.context.font = "16px monospace";
+        let x = 10;
+        config.players.forEach((player, index) => {
+            this.context.fillStyle = config.players[index].color;
+            this.context.fillText(`P${player.id}: ${gameState.scores[index]}`, x + (140*index), 20);
+        });
     }
 
 }

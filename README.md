@@ -72,6 +72,7 @@ CSS framework
 * [Vite](https://vitejs.dev): build tool that aims to provide a faster and leaner development experience for modern web projects
 * [planck-js](https://piqnt.com/planck.js): 2D JavaScript physics engine for cross-platform HTML5 game development
 * [StreamSaver.js](https://github.com/jimmywarting/StreamSaver.js): StreamSaver writes stream to the filesystem directly asynchronous
+* [xorshift](https://github.com/AndreasMadsen/xorshift): random number generator using xorshift128+
 * [fontawesome-free](https://fontawesome.com): icons
 
 ## License

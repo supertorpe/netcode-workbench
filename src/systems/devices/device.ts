@@ -1,7 +1,7 @@
 import { NetcodeConfig } from '../../config';
 import { NetworkConn, NetworkInterface } from '../network';
 import { Log, NetworkLog } from '../log';
-import { EventEmitter } from '../../commons';
+import { EventEmitter, Randomizer } from '../../commons';
 import { GameStateLog, GameStateMachine } from '../../model';
 import { BaseNetCode, INetCode, NetCodeFactory } from '../../netcode';
 import { Renderer, PlanckRenderer, SimpleRenderer } from '../renderers';
@@ -19,7 +19,6 @@ export class Device {
     protected netcode!: BaseNetCode;
     protected gameStateMachine!: GameStateMachine;
     protected renderer!: Renderer;
-    protected _npcs: number = 0;
     protected _interpolation: boolean = true;
 
     constructor(
@@ -87,11 +86,12 @@ export class Device {
         npcs: number,
         usePlanck: boolean, 
         interpolation: boolean,
-        debugBoxes: boolean) {
+        debugBoxes: boolean,
+        randomSeed: number[]) {
         // gameStateMachine
         this.gameStateMachine = (
             usePlanck ?
-            new PlanckGameStateMachine(this._log, tickMs / 1000, this.canvas.width, this.canvas.height, this._npcs) :
+            new PlanckGameStateMachine(this._log, tickMs / 1000, this.canvas.width, this.canvas.height, npcs, new Randomizer(randomSeed)) :
             new SimpleGameStateMachine()
         );
         // initialize netcode
@@ -107,8 +107,6 @@ export class Device {
         else
             return;
         this.netcode.tickMs = tickMs;
-        // npcs
-        this._npcs = npcs;
         // interpolation
         this._interpolation = interpolation;
         // build initial game state
@@ -158,6 +156,7 @@ export class Device {
             }
         } catch(error) {
             this._log.logError(error as string);
+            throw error;
         }
         
         this._deviceUpdatedEmitter.notify();

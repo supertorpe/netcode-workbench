@@ -23,7 +23,7 @@ export class SimpleBodyStateUtils {
 }
 
 export class SimpleGameState extends GameState {
-    constructor(public tick: number, public commands: Command[], public bodies: SimpleBodyState[]) {
+    constructor(public tick: number, public commands: Command[], public bodies: SimpleBodyState[], public scores: number[]) {
         super(tick, commands);
     }
 }
@@ -48,7 +48,7 @@ ${bodiesStr}  ${simpleGameState.commands.length>0?"commands    ":""}${CommandUti
     public static clone(simpleGameState: SimpleGameState): GameState {
         const bodies: SimpleBodyState[] = [];
         simpleGameState.bodies.forEach((body) => { bodies.push(SimpleBodyStateUtils.clone(body)); });
-        const result = new SimpleGameState(simpleGameState.tick, CommandUtils.cloneArray(simpleGameState.commands), simpleGameState.bodies);
+        const result = new SimpleGameState(simpleGameState.tick, CommandUtils.cloneArray(simpleGameState.commands), simpleGameState.bodies, [...simpleGameState.scores]);
         return result;
     }
 
@@ -56,7 +56,7 @@ ${bodiesStr}  ${simpleGameState.commands.length>0?"commands    ":""}${CommandUti
         const players: PlayerLog[] = [];
         simpleGameState.bodies.forEach((body) => {
             if (!body.isStatic)
-                players.push(new PlayerLog(body.id, body.posX * config.physics.worldScale, body.posY * config.physics.worldScale));
+                players.push(new PlayerLog(body.id, body.posX * config.physics.worldScale, body.posY * config.physics.worldScale, simpleGameState.scores[body.id-1]));
         });
         players.sort((a, b) => a.id > b.id ? 1 : -1);
         const commands: CommandLog[] = [];

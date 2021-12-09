@@ -23,7 +23,8 @@
     "msgpackr": "^1.5.1",
     "planck-js": "^0.3.31",
     "streamsaver": "^2.0.5",
-    "uplot": "^1.6.17"
+    "uplot": "^1.6.17",
+    "xorshift": "^1.2.0"
   },
   "devDependencies": {
     "@types/angular": "^1.8.3",

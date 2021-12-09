@@ -1,5 +1,4 @@
 import * as planck from 'planck-js';
-import * as Serializer from 'planck-js/lib/serializer';
 import { config, PlayerConfig } from '../config';
 import { Command, CommandUtils } from './command';
 import { CommandLog, GameState, GameStateLog, GameStateUtils, PlayerLog } from './game-state';
@@ -8,7 +7,9 @@ import { SimpleBodyState, SimpleGameState } from './simple-game-state';
 export class PlanckGameState extends GameState {
     constructor(public tick: number, public commands: Command[],
         public world: planck.World,
-        public bodies: planck.Body[]) {
+        public bodies: planck.Body[],
+        public scores: number[],
+        public playerWhoCollectedTheCoin: number | undefined) {
         super(tick, commands);
     }
 }
@@ -31,7 +32,8 @@ export class PlanckGameStateUtils extends GameStateUtils {
         let bodiesStr = '';
         planckGameState.bodies.forEach((body) => {
             if (!body.isStatic() && body.getUserData()) {
-                bodiesStr += `    P${(<PlayerConfig>body.getUserData()).id} x=${body.getPosition().x * config.physics.worldScale} y=${body.getPosition().y * config.physics.worldScale}\n`;
+                const playerId = (<PlayerConfig>body.getUserData()).id;
+                bodiesStr += `    P${playerId} x=${body.getPosition().x * config.physics.worldScale} y=${body.getPosition().y * config.physics.worldScale} ${playerId < 3 ? "score=" + planckGameState.scores[playerId-1] : ""}\n`;
             }
         });
         return `\nGameState tick: ${planckGameState.tick}
@@ -40,37 +42,12 @@ ${bodiesStr}  ${planckGameState.commands.length>0?"commands:":""}
     ${CommandUtils.arrayToString(planckGameState.commands)}`;
     }
 
-    public static clone(planckGameState: PlanckGameState): PlanckGameState {
-        const world = PlanckGameStateUtils.cloneWorld(planckGameState.world, planckGameState.bodies);
-        const result = new PlanckGameState(
-            planckGameState.tick,
-            CommandUtils.cloneArray(planckGameState.commands),
-            world,
-            PlanckGameStateUtils.extractBodies(world)
-            );
-        return result;
-    }
-
-    private static cloneWorld(world: planck.World, bodies: planck.Body[]): planck.World {
-        const result = Serializer.fromJson(Serializer.toJson(world)) as planck.World;
-        // hack: planck serialization does not dump userData
-        const resultBodies = [];
-        for (let b = result.getBodyList(); b; b = b.getNext()) {
-            resultBodies.unshift(b);
-        }
-        for (let [index, body] of resultBodies.entries()) {
-            if (body === null) continue;
-            body.setUserData(bodies[index].getUserData());
-        }
-        return result;
-    }
-
     public static toLog(planckGameState: PlanckGameState): GameStateLog {
         const players: PlayerLog[] = [];
         planckGameState.bodies.forEach((body) => {
             if (!body.isStatic() && body.getUserData()) {
                 let playerConfig = <PlayerConfig>body.getUserData();
-                players.push(new PlayerLog(playerConfig.id, body.getPosition().x * config.physics.worldScale, body.getPosition().y * config.physics.worldScale));
+                players.push(new PlayerLog(playerConfig.id, body.getPosition().x * config.physics.worldScale, body.getPosition().y * config.physics.worldScale, planckGameState.scores[playerConfig.id-1]));
             }
         });
         players.sort((a, b) => a.id > b.id ? 1 : -1);
@@ -103,11 +80,11 @@ ${bodiesStr}  ${planckGameState.commands.length>0?"commands:":""}
                     body.getLinearVelocity().x, body.getLinearVelocity().y,
                     (<any>body.getUserData()).width,
                     (<any>body.getUserData()).height,
-                    config.border.color);
+                    (<any>body.getUserData()).color);
                 bodies.push(simpleBody);
             }
         });
-        return new SimpleGameState(planckGameState.tick, [], bodies);
+        return new SimpleGameState(planckGameState.tick, [], bodies, [...planckGameState.scores]);
     }
 }
 

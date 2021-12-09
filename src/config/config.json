@@ -66,6 +66,12 @@
                 "keyRight": 39
             }
         ],
+        "coin": {
+            "color": "orange",
+            "x": 150,
+            "y": 125,
+            "size": 10
+        },
         "npc" : {
             "color": "black"
         },

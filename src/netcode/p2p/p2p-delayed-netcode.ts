@@ -1,4 +1,5 @@
 import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, PlanckGameState, PlanckGameStateUtils } from '../../model';
+import { PlanckGameStateMachine } from '../../systems/gamestate-machine';
 import { BaseNetCode } from '../base-netcode';
 
 /*
@@ -45,10 +46,11 @@ export class P2PDelayedNetCode extends BaseNetCode {
         this.log.logWarn(`Waiting commands for tick ${this._currentTick}: ${this._gameState.commands.length} of ${this.net.connectionCount + 1}`);
       } else {
         this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
-        this.log.logInfo(PlanckGameStateUtils.toString(this._gameState as PlanckGameState));
-        result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
+        const planckGameState = this._gameState as PlanckGameState;
+        this.log.logInfo(PlanckGameStateUtils.toString(planckGameState));
+        result = PlanckGameStateUtils.toLog(planckGameState);
         // compute next state
-        this.prevGameState = PlanckGameStateUtils.clone(this._gameState as PlanckGameState);
+        this.prevGameState = (this.gameStateMachine as PlanckGameStateMachine).clone(planckGameState);
         this.gameStateMachine.compute(this._gameState);
         this._currentTick++;
         PlanckGameStateUtils.incTick(this._gameState);
