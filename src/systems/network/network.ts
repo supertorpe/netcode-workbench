@@ -20,17 +20,12 @@ export class NetworkInterface {
     get messageSentEmitter(): EventEmitter<Message> { return this._messageSentEmitter; }
     get messageReceivedEmitter(): EventEmitter<Message> { return this._messageReceivedEmitter; }
 
-    constructor(private log: Log) { }
+    constructor() { }
 
     public connect(localConn: NetworkConn, remoteConn: NetworkConn) {
         this.attachListeners(localConn);
         this.connections.push(localConn);
         localConn.connect(remoteConn);
-        if (remoteConn.peerId === 0) {
-            this.log.logInfo(`Connected to Server`);
-        } else {
-            this.log.logInfo(`Connected to Player ${remoteConn.peerId}`);
-        }
     }
 
     private attachListeners(connection: NetworkConn) {
@@ -55,12 +50,7 @@ export class NetworkInterface {
     public closeConnections() {
         this.connections.forEach((conn) => {
             conn.close();
-            if (conn.peer.peerId === 0) {
-                this.log.logInfo(`Disconnected from Server`);
-            } else {
-                this.log.logInfo(`Disconnected from Player ${conn.peer.peerId}`);
-            }
-            this._disconnectionEmitter.notify(conn);
+            conn.removeListeners();
         });
         this.connections = [];
     }
@@ -149,6 +139,14 @@ export class NetworkConn {
 
     public close() {
         this._closed = true;
+        this._disconnectionEmitter.notify(this._peer);
+    }
+
+    public removeListeners() {
+        this._connectionEmitter.removeListeners();
+        this._disconnectionEmitter.removeListeners();
+        this._messageSentEmitter.removeListeners();
+        this._messageReceivedEmitter.removeListeners();
     }
 
 }

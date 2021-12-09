@@ -14,6 +14,7 @@ export class Device {
     protected _log: Log;
     protected _gameStateHistory: GameStateLog[];
     protected _networkInterface: NetworkInterface;
+    protected _networkListenersAttached = false;
     protected _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     protected netcode!: BaseNetCode;
     protected gameStateMachine!: GameStateMachine;
@@ -26,7 +27,7 @@ export class Device {
         protected playerId: number,
         protected canvas: HTMLCanvasElement) {
         this._log = new Log();
-        this._networkInterface = new NetworkInterface(this._log);
+        this._networkInterface = new NetworkInterface();
         this._gameStateHistory = [];
     }
 
@@ -38,6 +39,26 @@ export class Device {
     set interpolation(value: boolean) { this._interpolation = value; }
     get debugBoxes(): boolean { return this.renderer.debugBoxes; }
     set debugBoxes(value: boolean) { this.renderer.debugBoxes = value; }
+
+    public init() {
+        if (!this._networkListenersAttached) {
+            this._networkListenersAttached = true;
+            this._networkInterface.connectionEmitter.addEventListener((peer) => {
+                if (peer.peerId === 0) {
+                    this.log.logInfo(`Connected to Server`);
+                } else {
+                    this.log.logInfo(`Connected to Player ${peer.peerId}`);
+                }
+            });
+            this._networkInterface.disconnectionEmitter.addEventListener((peer) => {
+                if (peer.peerId === 0) {
+                    this.log.logInfo(`Disconnected from Server`);
+                } else {
+                    this.log.logInfo(`Disconnected from Player ${peer.peerId}`);
+                }
+            });
+        }
+    }
 
     public connect(device: Device, serializerName: string,
         minSendLatency: number, maxSendLatency: number, packetSendLoss: number,
@@ -106,10 +127,12 @@ export class Device {
 
     public stop() {
         this.running = false;
-        this._networkInterface.removeListeners();
-        this._networkInterface.closeConnections();
         this._networkInterface.trafficLog.flush();
         this._networkInterface.trafficLog.removeListeners();
+        this._networkInterface.closeConnections();
+        this._networkInterface.removeListeners();
+        this._networkListenersAttached = false;
+        
     }
 
     public gameStateHistoryLog(): string {

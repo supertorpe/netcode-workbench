@@ -762,10 +762,15 @@ class Gui {
 
                     // connect and play
                     if (this.p2pmode) {
+                        this.devicePlayer1.init();
+                        this.devicePlayer2.init();
                         this.devicePlayer1.connect(this.devicePlayer2, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                         this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes);
                     } else {
+                        this.devicePlayer1.init();
+                        this.devicePlayer2.init();
+                        this.deviceServer.init();
                         this.devicePlayer1.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
                         this.devicePlayer2.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         this.deviceServer.play(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, true, false, false);
