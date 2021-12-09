@@ -554,14 +554,16 @@ class Gui {
                     this.resetLayout();
                 };
 
-                document.addEventListener('jspanelresizestop', (event:any) => {
-                    if (event.panel.id === 'panelTrafficChart') {
-                        $scope.info.uplot.setSize({
-                            width: this.uplotChartPanel.clientWidth,
-                            height: this.uplotChartPanel.clientHeight - 50
-                        });
-                    }
-                }, false);
+                ['jspanelresizestop','jspanelmaximized','jspanelnormalized'].forEach((evt) => {
+                    document.addEventListener(evt, (event:any) => {
+                        if (event.panel.id === 'panelTrafficChart') {
+                            $scope.info.uplot.setSize({
+                                width: this.uplotChartPanel.clientWidth,
+                                height: this.uplotChartPanel.clientHeight - 50
+                            });
+                        }
+                    }, false);
+                });
 
                 $scope.showTrafficChart = () => {
                     $scope.info.uplot = new uPlot(this.p2pmode ? $scope.info.uplotP2POpts : $scope.info.uplotCSOpts, $scope.info.uplotData, this.uplotChartPanel);
