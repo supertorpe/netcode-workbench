@@ -22,4 +22,11 @@ export class CommandUtils {
     public static toFullString(command: Command): string {
         return `tick ${command.tick} P${command.playerId}:${command.value}`;
     }
+    public static arrayToFullString(commands: Command[]): string {
+        let result = '';
+        commands.forEach((command) => {
+            result += `[tick ${command.tick} P${command.playerId}:${command.value}] `;
+        });
+        return result;
+    }
 }

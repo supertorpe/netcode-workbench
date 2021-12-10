@@ -31,8 +31,8 @@ export class P2PNaiveNetCode extends BaseNetCode {
       let removed = 0;
       const remoteCommandsCount = this.remoteCommands.length;
       for (let index = 0; index < remoteCommandsCount; index++) {
-        let command = this.remoteCommands[index];
-        if (command && command.tick === this._gameState.tick) {
+        let command = this.remoteCommands[index-removed];
+        if (command && command.tick === this._currentTick) {
           this._gameState.commands.push(command);
           this.remoteCommands.splice(index - removed++, 1);
         }
