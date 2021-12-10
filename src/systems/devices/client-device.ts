@@ -1,8 +1,8 @@
 import { CONSTS } from "../../config";
-import { Device } from "./device";
+import { HeadedDevice } from "./headed-device";
 import { input } from '../input/input';
 
-export class ClientDevice extends Device {
+export class ClientDevice extends HeadedDevice {
     constructor(
         protected playerId: number,
         protected keyUp: number,

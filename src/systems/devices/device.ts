@@ -4,9 +4,19 @@ import { Log, NetworkLog } from '../log';
 import { EventEmitter, Randomizer } from '../../commons';
 import { GameStateLog, GameStateMachine } from '../../model';
 import { BaseNetCode, INetCode, NetCodeFactory } from '../../netcode';
-import { Renderer, PlanckRenderer, SimpleRenderer } from '../renderers';
 import { PlanckGameStateMachine, SimpleGameStateMachine } from '../gamestate-machine';
 import { SerializerFactory } from '../serializers';
+
+export class DevicePlayConfig {
+    constructor(public algorithm: NetcodeConfig,
+        public netcodeClass: INetCode | null,
+        public tickMs: number,
+        public npcs: number,
+        public width: number,
+        public height: number,
+        public usePlanck: boolean,
+        public randomSeed: number[]) { }
+}
 
 export class Device {
 
@@ -18,13 +28,10 @@ export class Device {
     protected _deviceUpdatedEmitter: EventEmitter<void> = new EventEmitter<void>();
     protected netcode!: BaseNetCode;
     protected gameStateMachine!: GameStateMachine;
-    protected renderer!: Renderer;
-    protected _interpolation: boolean = true;
 
     constructor(
         protected isServer: boolean,
-        protected playerId: number,
-        protected canvas: HTMLCanvasElement) {
+        protected playerId: number) {
         this._log = new Log();
         this._networkInterface = new NetworkInterface();
         this._gameStateHistory = [];
@@ -34,10 +41,6 @@ export class Device {
     get trafficLog(): NetworkLog { return this._networkInterface.trafficLog; }
     get deviceUpdatedEmitter(): EventEmitter<void> { return this._deviceUpdatedEmitter; }
     get gameStateHistory(): GameStateLog[] { return this._gameStateHistory; }
-    get interpolation(): boolean { return this._interpolation; }
-    set interpolation(value: boolean) { this._interpolation = value; }
-    get debugBoxes(): boolean { return this.renderer.debugBoxes; }
-    set debugBoxes(value: boolean) { this.renderer.debugBoxes = value; }
 
     public init() {
         if (!this._networkListenersAttached) {
@@ -79,43 +82,28 @@ export class Device {
         this._gameStateHistory = [];
     }
 
-    public play(
-        algorithm: NetcodeConfig,
-        netcodeClass: INetCode | null,
-        tickMs: number,
-        npcs: number,
-        usePlanck: boolean, 
-        interpolation: boolean,
-        debugBoxes: boolean,
-        randomSeed: number[]) {
+    public play(config: DevicePlayConfig) {
         // gameStateMachine
         this.gameStateMachine = (
-            usePlanck ?
-            new PlanckGameStateMachine(this._log, tickMs / 1000, this.canvas.width, this.canvas.height, npcs, new Randomizer(randomSeed)) :
+            config.usePlanck ?
+            new PlanckGameStateMachine(this._log, config.tickMs / 1000, config.width, config.height, config.npcs, new Randomizer(config.randomSeed)) :
             new SimpleGameStateMachine()
         );
         // initialize netcode
         let netcode: BaseNetCode | null;
-        if (netcodeClass === null) {
-            const algorithmName = algorithm.name + (algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
+        if (config.netcodeClass === null) {
+            const algorithmName = config.algorithm.name + (config.algorithm.type === 'cs' ? this.isServer ? '-server' : '-client' : '');
             netcode = NetCodeFactory.build(algorithmName, this._log, this._networkInterface, this.gameStateMachine);
         } else {
-            netcode = NetCodeFactory.buildFromClass(netcodeClass, this.log, this._networkInterface, this.gameStateMachine);
+            netcode = NetCodeFactory.buildFromClass(config.netcodeClass, this.log, this._networkInterface, this.gameStateMachine);
         }
         if (netcode !== null)
             this.netcode = netcode;
         else
             return;
-        this.netcode.tickMs = tickMs;
-        // interpolation
-        this._interpolation = interpolation;
+        this.netcode.tickMs = config.tickMs;
         // build initial game state
         const initialGameState = this.gameStateMachine.buildInitialGameState();
-        // initialize renderer
-        this.renderer = usePlanck ?
-            new PlanckRenderer(this.log, this.canvas, this.netcode) :
-            new SimpleRenderer(this.log, this.canvas, this.netcode);
-        this.renderer.debugBoxes = debugBoxes;
         // start netcode
         this.netcode.start(initialGameState);
         // start gameloop
@@ -156,13 +144,10 @@ export class Device {
             }
         } catch(error) {
             this._log.logError(error as string);
-            throw error;
         }
         
         this._deviceUpdatedEmitter.notify();
     }
 
-    private draw() {
-        this.renderer.render(this._interpolation);
-    }
+    protected draw() { }
 }

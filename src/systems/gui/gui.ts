@@ -12,6 +12,8 @@ import { ClientDevice, ServerDevice } from '../devices';
 import { BaseNetCode, INetCode } from '../../netcode';
 import { Command, CommandMessage, CommandUtils, GameStateMessage, PlanckGameStateUtils, SimpleGameStateUtils } from '../../model';
 import { currentTimestamp, randomInt } from '../../commons';
+import { HeadedDevicePlayConfig } from '../devices/headed-device';
+import { NPCDevice } from '../devices/npc-device';
 
 class Gui {
 
@@ -310,9 +312,10 @@ class Gui {
                     gamestatesPlayer1: [],
                     gamestatesPlayer2: [],
                     gamestatesServer: [],
+                    deviceNPCs: [],
                     uplot: undefined,
                     uplotP2POpts: {
-                        width: this.uplotChartPanel.clientWidth,
+                        width: this.uplotChartPanel.clientWidth - 20,
                         height: this.uplotChartPanel.clientHeight - 50,
                         pxAlign: 0,
                         scales: {
@@ -343,7 +346,7 @@ class Gui {
                         ]
                     },
                     uplotCSOpts: {
-                        width: this.uplotChartPanel.clientWidth,
+                        width: this.uplotChartPanel.clientWidth - 20,
                         height: this.uplotChartPanel.clientHeight - 50,
                         pxAlign: 0,
                         scales: {
@@ -578,6 +581,7 @@ class Gui {
                         this.deviceServer.stop();
                         this.devicePlayer1.stop();
                         this.devicePlayer2.stop();
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.stop(); });
                         $scope.info.btnStopEnabled = false;
                         $scope.info.btnPlayEnabled = true;
                         $scope.info.playing = false;
@@ -627,6 +631,7 @@ class Gui {
                     this.deviceServer.reset();
                     this.devicePlayer1.reset();
                     this.devicePlayer2.reset();
+                    $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.reset(); });
                     // traffic log
                     if ($scope.info.uplot) {
                         $scope.info.uplot.destroy();
@@ -762,22 +767,46 @@ class Gui {
                         }
                     });
                     const randomSeed = [randomInt(0,16378),randomInt(0,16378),randomInt(0,16378),randomInt(0,16378)];
+                    // create NPC devices
+                    $scope.info.deviceNPCs = [];
+                    for (let i = 0; i < $scope.info.npcs; i++) {
+                        $scope.info.deviceNPCs.push(new NPCDevice(i + 100));
+                    }
                     // connect and play
                     if (this.p2pmode) {
                         this.devicePlayer1.init();
                         this.devicePlayer2.init();
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.init(); });
                         this.devicePlayer1.connect(this.devicePlayer2, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes, randomSeed);
-                        this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, true, $scope.info.interpolation, $scope.info.debugBoxes, randomSeed);
+                        for (let i = 0; i < $scope.info.deviceNPCs.length; i++) {
+                            const device = $scope.info.deviceNPCs[i] as NPCDevice;
+                            this.devicePlayer1.connect(device, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
+                            this.devicePlayer2.connect(device, $scope.info.serializer.name, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                            for (let j = i + 1; j < $scope.info.deviceNPCs.length; j++) {
+                                let otherDevice = $scope.info.deviceNPCs[j] as NPCDevice;
+                                device.connect(otherDevice, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                            }
+                        }
+                        const devicePlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.devicePlayer1.play(devicePlayConfig);
+                        this.devicePlayer2.play(devicePlayConfig);
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.play(devicePlayConfig); });
                     } else {
                         this.devicePlayer1.init();
                         this.devicePlayer2.init();
                         this.deviceServer.init();
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.init(); });
                         this.devicePlayer1.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1);
                         this.devicePlayer2.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
-                        this.deviceServer.play(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, true, false, false, randomSeed);
-                        this.devicePlayer1.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes, randomSeed);
-                        this.devicePlayer2.play(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, false, $scope.info.interpolation, $scope.info.debugBoxes, randomSeed);
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => {
+                            device.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
+                        });
+                        const serverPlayConfig = new HeadedDevicePlayConfig(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, false, false);
+                        const clientPlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, false, randomSeed, $scope.info.interpolation, $scope.info.debugBoxes);
+                        this.deviceServer.play(serverPlayConfig);
+                        this.devicePlayer1.play(clientPlayConfig);
+                        this.devicePlayer2.play(clientPlayConfig);
+                        $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.play(clientPlayConfig); });
                     }
                     $scope.info.btnStopEnabled = true;
                     $scope.info.btnPlayEnabled = false;
