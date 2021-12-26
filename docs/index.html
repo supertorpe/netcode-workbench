@@ -20,9 +20,9 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/netcode-workbench/assets/index.b01ac199.js"></script>
-  <link rel="modulepreload" href="/netcode-workbench/assets/vendor.e1363f84.js">
-  <link rel="stylesheet" href="/netcode-workbench/assets/index.62408cef.css">
+  <script type="module" crossorigin src="/netcode-workbench/assets/index.5ae8e3b7.js"></script>
+  <link rel="modulepreload" href="/netcode-workbench/assets/vendor.c03453b5.js">
+  <link rel="stylesheet" href="/netcode-workbench/assets/index.aeeeea47.css">
   <script type="module">!function(){try{new Function("m","return import(m)")}catch(o){console.warn("vite: loading legacy build because dynamic import is unsupported, syntax error above should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}}();</script>
 </head>
 
@@ -148,7 +148,7 @@
     </div>
     <!-- PLAYER 1 -->
     <div id="player1GameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer1 track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesPlayer1 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -159,11 +159,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer1[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesPlayer1[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -174,7 +174,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
@@ -193,7 +193,7 @@
     </div>
     <!-- PLAYER 2 -->
     <div id="player2GameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer2 track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesPlayer2 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -204,11 +204,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer2[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesPlayer2[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -219,7 +219,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
@@ -239,7 +239,7 @@
     </div>
     <!-- SERVER -->
     <div id="serverGameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesServer track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesServer track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -250,11 +250,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesServer[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesServer[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -265,7 +265,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
@@ -287,7 +287,7 @@
     
   <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
   <script nomodule id="vite-legacy-polyfill" src="/netcode-workbench/assets/polyfills-legacy.59c16804.js"></script>
-  <script nomodule id="vite-legacy-entry" data-src="/netcode-workbench/assets/index-legacy.2d14ec11.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+  <script nomodule id="vite-legacy-entry" data-src="/netcode-workbench/assets/index-legacy.34dd29f2.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
 </body>
 
 </html>
