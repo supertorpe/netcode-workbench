@@ -62,6 +62,21 @@ export class P2PRollbackNetCode extends BaseNetCode {
         // fast-forward
         this.tick();
       }
+      this.cleanup();
+    }
+  }
+
+  private cleanup() {
+    // clean old gameHistory
+    while (this.gameStateHistory.length > 100) {
+      const gameState = this.gameStateHistory[0] as PlanckGameState;
+      const worldToDestroy = gameState.world;
+      if (worldToDestroy) {
+        for (let b = worldToDestroy.getBodyList(); b; b = b.getNext()) {
+          worldToDestroy.destroyBody(b);
+        }
+      }
+      this.gameStateHistory.shift();
     }
   }
 
