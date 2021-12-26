@@ -22,6 +22,7 @@
 #### P2P
 - p2p-naive: it only keeps one Game State in memory. 'Naive' sends and receives commands on every tick. If there are remote commands pending (due to lag), it waits before generating next Game State: latency affects it a lot. This doesn't allow real interpolation: the position of each body can be calculated from the time elapsed since the tick and the position and velocity of the body. When latency or tick period is high, this calculation gives wrong results (as it ignores collisions)
 - p2p-delayed: similar to 'naive' but it keeps the last two Game States in memory, so interpolation works better by delaying the render frame
+- p2p-rollback: each node maintains a history of game states. When a command that belongs to an old state arrives, the history is recalculated from that state on. Each node sends commands only when it changes value, not on every tick.
 #### Client-Server
 - cs-lockstep: The server advances the tick when the time comes but only if it has received the commands from all the clients. The server calculates the physics and sends the game state to the clients
 #### Custom
