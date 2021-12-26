@@ -1,4 +1,4 @@
-import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, PlanckGameState, PlanckGameStateUtils } from '../../model';
+import { Command, CommandUtils, CommandMessage, GameState, PlanckGameState, PlanckGameStateUtils } from '../../model';
 import { PlanckGameStateMachine } from '../../systems/gamestate-machine';
 import { BaseNetCode } from '../base-netcode';
 
@@ -22,8 +22,7 @@ export class P2PDelayedNetCode extends BaseNetCode {
 
   }
 
-  public tick(): GameStateLog | null {
-    let result = null;
+  public tick(): void {
     // check if a new gamestate needs to be created
     const tickBasedOnTime = this.tickBasedOnTime();
     if (tickBasedOnTime > this._currentTick) {
@@ -48,7 +47,7 @@ export class P2PDelayedNetCode extends BaseNetCode {
         this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
         const planckGameState = this._gameState as PlanckGameState;
         this.log.logInfo(PlanckGameStateUtils.toString(planckGameState));
-        result = PlanckGameStateUtils.toLog(planckGameState);
+        this._gamestateLogEmitter.notify(PlanckGameStateUtils.toLog(planckGameState));
         // compute next state
         this.prevGameState = (this.gameStateMachine as PlanckGameStateMachine).clone(planckGameState);
         this.gameStateMachine.compute(this._gameState);
@@ -59,7 +58,6 @@ export class P2PDelayedNetCode extends BaseNetCode {
         this.localCommandDumped = false;
       }
     }
-    return result;
   }
 
   localCommandReceived(playerId: number, commandValue: number): void {
@@ -84,13 +82,13 @@ export class P2PDelayedNetCode extends BaseNetCode {
     return (this.prevGameState ? this.prevGameState : this._gameState);
   }
 
-  public getGameState(tick: number): GameState | null {
+  public getGameState(tick: number): GameState | undefined {
     if (this._gameState.tick === tick)
       return this._gameState;
     else if (this.prevGameState && this.prevGameState.tick === tick)
       return this.prevGameState;
     else
-      return null;
+      return undefined;
   }
 
 }

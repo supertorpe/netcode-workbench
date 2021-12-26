@@ -144,7 +144,7 @@
     </div>
     <!-- PLAYER 1 -->
     <div id="player1GameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer1 track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesPlayer1 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -155,11 +155,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer1[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesPlayer1[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -170,7 +170,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
@@ -189,7 +189,7 @@
     </div>
     <!-- PLAYER 2 -->
     <div id="player2GameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesPlayer2 track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesPlayer2 track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -200,11 +200,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesPlayer2[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesPlayer2[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -215,7 +215,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
@@ -235,7 +235,7 @@
     </div>
     <!-- SERVER -->
     <div id="serverGameStates" class="gameState">
-        <div data-ng-if="!info.playing" class="card" data-ng-repeat="item in info.gamestatesServer track by $index">
+        <div data-ng-if="!info.playing" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in info.gamestatesServer track by $index">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -246,11 +246,11 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>
-        <div data-ng-if="info.playing && info.realtimeGameStates" class="card" data-ng-repeat="item in [info.gamestatesServer[0]] track by item.tick">
+        <div data-ng-if="info.playing && info.realtimeGameStates" class="card {{::item.mismatches?'gameStateError':''}}" data-ng-repeat="item in [info.gamestatesServer[0]] track by item.tick">
             <div class="section">Tick: {{::item.tick}}</div>
             <div class="section">
                 <div class="small-text" data-ng-repeat="player in item.players track by player.id">P{{::player.id}} [{{::player.x}} ,
@@ -261,7 +261,7 @@
                 </span>
             </div>
             <div class="section">
-                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}} 
+                Commands: <span data-ng-repeat="command in item.commands track by $index">P{{::command.playerId}}:{{::command.value}}{{::command.cloned?'*':''}} 
                 </span>
             </div>
         </div>

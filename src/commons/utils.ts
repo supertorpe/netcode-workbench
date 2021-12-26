@@ -15,3 +15,23 @@ export class Randomizer {
         return Math.floor(min + this.xorshift.random() * (max - min));
     }
 }
+
+export class RepeatableRandomizer {
+    private xorshift: any;
+    private randomValues: number[] = [];
+
+    constructor(seed: number[]) {
+        this.xorshift = new xorshift.XorShift(seed);
+    }
+    public randomInt(randomPointer: number, min: number, max: number): number {
+        randomPointer++;
+        for (let i = this.randomValues.length; i <= randomPointer; i++) {
+            let rnd = this.internalRandomInt(min, max);
+            this.randomValues.push(rnd);
+        }
+        return this.randomValues[randomPointer];
+    }
+    private internalRandomInt(min: number, max: number): number {
+        return Math.floor(min + this.xorshift.random() * (max - min));
+    }
+}

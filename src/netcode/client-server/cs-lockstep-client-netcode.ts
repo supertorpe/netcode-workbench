@@ -1,4 +1,4 @@
-import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, SimpleGameState, SimpleGameStateUtils } from "../../model";
+import { Command, CommandUtils, CommandMessage, GameState, SimpleGameState, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../base-netcode";
 
 export class CSLockstepClientNetCode extends BaseNetCode {
@@ -6,14 +6,12 @@ export class CSLockstepClientNetCode extends BaseNetCode {
     private localCommandTick = -1;
     private lastTickReturned = -1;
 
-    public tick(): GameStateLog | null {
-        let result = null;
+    public tick(): void {
         if (this.lastTickReturned < this._currentTick && this._gameState) {
             this.lastTickReturned = this._currentTick;
             this.log.logInfo(SimpleGameStateUtils.toString(this._gameState as SimpleGameState));
-            result = SimpleGameStateUtils.toLog(this._gameState as SimpleGameState);
+            this._gamestateLogEmitter.notify(SimpleGameStateUtils.toLog(this._gameState as SimpleGameState));
         }
-        return result;
     }
 
     public localCommandReceived(playerId: number, commandValue: number): void {
@@ -43,9 +41,9 @@ export class CSLockstepClientNetCode extends BaseNetCode {
         return this._gameState;
     }
 
-    public getGameState(tick: number): GameState | null {
+    public getGameState(tick: number): GameState | undefined {
         if (this._gameState.tick === tick) return this._gameState;
-        else return null;
+        else return undefined;
     }
 
 }

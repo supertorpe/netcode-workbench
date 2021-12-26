@@ -3,18 +3,18 @@ import { CommandUtils, GameState, GameStateMachine, PlanckGameState, PlanckGameS
 import { Log } from "../log/log";
 import * as planck from 'planck-js';
 import * as Serializer from 'planck-js/lib/serializer';
-import { Randomizer } from "../../commons";
+import { RepeatableRandomizer } from "../../commons";
 
 export class PlanckGameStateMachine implements GameStateMachine {
 
     constructor(private log: Log, private step: number,
-        private canvasWidth: number, private canvasHeight: number, private npcs: number, private randomizer: Randomizer) {
+        private canvasWidth: number, private canvasHeight: number, private npcs: number, private randomizer: RepeatableRandomizer) {
     }
 
     buildInitialGameState(): GameState {
         const world = this.createPlanckWorld();
         const bodies = PlanckGameStateUtils.extractBodies(world);
-        const result = new PlanckGameState(0, [], world, bodies, new Array(config.players.length).fill(0), undefined);
+        const result = new PlanckGameState(0, [], world, bodies, new Array(config.players.length).fill(0), undefined, -1);
         this.attachWorldEvents(result);
         return result;
     }
@@ -24,8 +24,8 @@ export class PlanckGameStateMachine implements GameStateMachine {
         // coin was collected?
         if (gameState.playerWhoCollectedTheCoin) {
             gameState.scores[gameState.playerWhoCollectedTheCoin-1] += 10;
-            const newX = this.randomizer.randomInt(10, 290);
-            const newY = this.randomizer.randomInt(10, 240);
+            const newX = this.randomizer.randomInt(gs.randomPointer++, 10, 290);
+            const newY = this.randomizer.randomInt(gs.randomPointer++, 10, 240);
             const coin = gameState.bodies.find((body) => body.getUserData() && (<any>body.getUserData()).isCoin);
             if (coin) coin.setPosition(
                 planck.Vec2(newX / config.physics.worldScale, newY / config.physics.worldScale)
@@ -51,12 +51,12 @@ export class PlanckGameStateMachine implements GameStateMachine {
                 body.applyForce(planck.Vec2(forceX, forceY), body.getWorldCenter());
             }
         }
-        gameState.world.step(this.step);
-        gameState.world.clearForces();
+        gameState.world?.step(this.step);
+        gameState.world?.clearForces();
     }
 
     public attachWorldEvents(gameState: PlanckGameState) {
-        gameState.world.on('begin-contact', (contact: planck.Contact) => {
+        gameState.world?.on('begin-contact', (contact: planck.Contact) => {
             if (gameState.playerWhoCollectedTheCoin) return;
             let data: any = contact.getFixtureB().getBody().getUserData();
             if (data.isCoin) {
@@ -166,19 +166,21 @@ export class PlanckGameStateMachine implements GameStateMachine {
 
     public clone(planckGameState: PlanckGameState): PlanckGameState {
         const world = this.cloneWorld(planckGameState.world, planckGameState.bodies);
-        this.attachWorldEvents(planckGameState);
+        
         const result = new PlanckGameState(
             planckGameState.tick,
             CommandUtils.cloneArray(planckGameState.commands),
             world,
             PlanckGameStateUtils.extractBodies(world),
             [...planckGameState.scores],
-            planckGameState.playerWhoCollectedTheCoin
+            planckGameState.playerWhoCollectedTheCoin,
+            planckGameState.randomPointer
             );
+            this.attachWorldEvents(result);
         return result;
     }
 
-    private cloneWorld(world: planck.World, bodies: planck.Body[]): planck.World {
+    private cloneWorld(world: planck.World | null, bodies: planck.Body[]): planck.World {
         const result = Serializer.fromJson(Serializer.toJson(world)) as planck.World;
         // hack: planck serialization does not dump userData
         const resultBodies = [];

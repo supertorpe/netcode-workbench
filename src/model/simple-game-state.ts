@@ -24,7 +24,7 @@ export class SimpleBodyStateUtils {
 
 export class SimpleGameState extends GameState {
     constructor(public tick: number, public commands: Command[], public bodies: SimpleBodyState[], public scores: number[]) {
-        super(tick, commands);
+        super(tick, commands, 0);
     }
 }
 

@@ -581,6 +581,7 @@ class Gui {
                         this.deviceServer.stop();
                         this.devicePlayer1.stop();
                         this.devicePlayer2.stop();
+                        $scope.findMismatches();
                         $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.stop(); });
                         $scope.info.btnStopEnabled = false;
                         $scope.info.btnPlayEnabled = true;
@@ -818,6 +819,57 @@ class Gui {
                     $scope.info.logsPlayer1 = this.devicePlayer1.log.traces;
                     $scope.info.logsPlayer2 = this.devicePlayer2.log.traces;
                 };
+                $scope.findMismatches = () => {
+                    if (!this.p2pmode) {
+                        this.deviceServer.gameStateHistory.forEach((logServer) => {
+                            const logPlayer1 = this.devicePlayer1.gameStateHistory.find((log1) => log1.tick === logServer.tick);
+                            if (!logPlayer1) {
+                                logServer.mismatches = true;
+                            } else {
+                                if (!logServer.equals(logPlayer1, false)) {
+                                    logServer.mismatches = true;
+                                    logPlayer1.mismatches = true;
+                                }
+                            }
+                            const logPlayer2 = this.devicePlayer2.gameStateHistory.find((log2) => log2.tick === logServer.tick);
+                            if (!logPlayer2) {
+                                logServer.mismatches = true;
+                            } else {
+                                if (!logServer.equals(logPlayer2, false)) {
+                                    logServer.mismatches = true;
+                                    logPlayer2.mismatches = true;
+                                }
+                            }
+                        });
+                    }
+                    this.devicePlayer1.gameStateHistory.forEach((logPlayer1) => {
+                        if (!logPlayer1.mismatches) {
+                            const logPlayer2 = this.devicePlayer2.gameStateHistory.find((log2) => log2.tick === logPlayer1.tick);
+                            if (!logPlayer2) {
+                                logPlayer1.mismatches = true;
+                            } else {
+                                if (!logPlayer1.equals(logPlayer2, this.p2pmode)) {
+                                    logPlayer1.mismatches = true;
+                                    logPlayer2.mismatches = true;
+                                }
+                            }
+                        }
+                    });
+                    this.devicePlayer2.gameStateHistory.forEach((logPlayer2) => {
+                        if (!logPlayer2.mismatches) {
+                            const logPlayer1 = this.devicePlayer1.gameStateHistory.find((log1) => log1.tick === logPlayer2.tick);
+                            if (!logPlayer1) {
+                                logPlayer2.mismatches = true;
+                            } else {
+                                if (!logPlayer2.equals(logPlayer1, this.p2pmode)) {
+                                    logPlayer2.mismatches = true;
+                                    logPlayer1.mismatches = true;
+                                }
+                            }
+                        }
+                    });
+                };
+
                 $scope.changeInterpolation = () => {
                     this.devicePlayer1.interpolation = $scope.info.interpolation;
                     this.devicePlayer2.interpolation = $scope.info.interpolation;

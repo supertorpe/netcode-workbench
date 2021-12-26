@@ -1,4 +1,4 @@
-import { Command, CommandUtils, GameState, GameStateLog, GameStateMessage, PlanckGameState, PlanckGameStateUtils, SimpleGameStateUtils } from "../../model";
+import { Command, CommandUtils, GameState, GameStateMessage, PlanckGameState, PlanckGameStateUtils, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../base-netcode";
 
 export class CSLockstepServerNetCode extends BaseNetCode {
@@ -6,15 +6,14 @@ export class CSLockstepServerNetCode extends BaseNetCode {
     private initialGameStateSent = false;
     private remoteCommands: Command[] = [];
 
-    public tick(): GameStateLog | null {
-        let result = null;
+    public tick(): void {
         // broadcast the initial gamestate
         if (!this.initialGameStateSent) {
             this.initialGameStateSent = true;
             const simpleGameState = PlanckGameStateUtils.buildSimpleGameState(this._gameState as PlanckGameState);
             this.log.logInfo(`sending gamestate: ${SimpleGameStateUtils.toLog(simpleGameState)}`);
             this.net.broadcast(new GameStateMessage(simpleGameState));
-            result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
+            this._gamestateLogEmitter.notify(PlanckGameStateUtils.toLog(this._gameState as PlanckGameState));
         }
         // check if a new gamestate needs to be created
         const tickBasedOnTime = this.tickBasedOnTime();
@@ -35,7 +34,7 @@ export class CSLockstepServerNetCode extends BaseNetCode {
           } else {
             this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
             this.log.logInfo(PlanckGameStateUtils.toString(this._gameState as PlanckGameState));
-            result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
+            this._gamestateLogEmitter.notify(PlanckGameStateUtils.toLog(this._gameState as PlanckGameState));
             // compute next state
             this.gameStateMachine.compute(this._gameState);
             this._currentTick++;
@@ -47,7 +46,6 @@ export class CSLockstepServerNetCode extends BaseNetCode {
             this.net.broadcast(new GameStateMessage(simpleGameState));
           }
         }
-        return result;
       }
 
     public localCommandReceived(_playerId: number, _commandValue: number): Command | undefined {
@@ -63,9 +61,9 @@ export class CSLockstepServerNetCode extends BaseNetCode {
     public getGameStateToRender(): GameState {
         return this._gameState;
     }
-    public getGameState(tick: number): GameState | null {
+    public getGameState(tick: number): GameState | undefined {
         if (this._gameState.tick === tick) return this._gameState;
-        else return null;
+        else return undefined;
     }
 
 }

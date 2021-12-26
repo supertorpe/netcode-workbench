@@ -11,7 +11,7 @@ class SimpleInterpolationInfo {
         public currentGameState: SimpleGameState,
         public currentGameStateTime: number,
         public elapsed: number,
-        public nextGameState: SimpleGameState | null,
+        public nextGameState: SimpleGameState | undefined,
         public nextGameStateTime: number | undefined,
         public nextElapsed: number,
         public tickTimeDiff: number
@@ -50,7 +50,7 @@ export class SimpleRenderer extends Renderer {
         const gameState = this.netcode.getGameStateToRender() as SimpleGameState;
         if (!gameState) return;
         const gameStateTime = this.netcode.tickTime(gameState.tick);
-        const nextGameState = this.netcode.getGameState(gameState.tick + 1) as (SimpleGameState | null);
+        const nextGameState = this.netcode.getGameState(gameState.tick + 1) as (SimpleGameState | undefined);
         const nextGameStateTime = nextGameState ? this.netcode.tickTime(nextGameState.tick) : undefined;
 
         if (nextGameStateTime) {

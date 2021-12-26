@@ -1,4 +1,4 @@
-import { Command, CommandUtils, CommandMessage, GameState, GameStateLog, PlanckGameState, PlanckGameStateUtils } from '../../model';
+import { Command, CommandUtils, CommandMessage, GameState, PlanckGameState, PlanckGameStateUtils } from '../../model';
 import { BaseNetCode } from '../base-netcode';
 
 /*
@@ -18,8 +18,7 @@ export class P2PNaiveNetCode extends BaseNetCode {
     return super.start(gameState);
   }
 
-  public tick(): GameStateLog | null {
-    let result = null;
+  public tick(): void {
     // check if a new gamestate needs to be created
     const tickBasedOnTime = this.tickBasedOnTime();
     if (tickBasedOnTime > this._currentTick) {
@@ -43,7 +42,7 @@ export class P2PNaiveNetCode extends BaseNetCode {
       } else {
         this._gameState.commands.sort((a, b) => a.playerId > b.playerId ? 1 : -1);
         this.log.logInfo(PlanckGameStateUtils.toString(this._gameState as PlanckGameState));
-        result = PlanckGameStateUtils.toLog(this._gameState as PlanckGameState);
+        this._gamestateLogEmitter.notify(PlanckGameStateUtils.toLog(this._gameState as PlanckGameState));
         // compute next state
         this.gameStateMachine.compute(this._gameState);
         this._currentTick++;
@@ -53,7 +52,6 @@ export class P2PNaiveNetCode extends BaseNetCode {
         this.localCommandDumped = false;
       }
     }
-    return result;
   }
 
   localCommandReceived(playerId: number, commandValue: number) {
@@ -78,9 +76,9 @@ export class P2PNaiveNetCode extends BaseNetCode {
     return this._gameState;
   }
 
-  public getGameState(tick: number): GameState | null {
+  public getGameState(tick: number): GameState | undefined {
     if (this._gameState.tick === tick) return this._gameState;
-    else return null;
+    else return undefined;
   }
 
 }

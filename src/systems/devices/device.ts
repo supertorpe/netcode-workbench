@@ -1,7 +1,7 @@
 import { NetcodeConfig } from '../../config';
 import { NetworkConn, NetworkInterface } from '../network';
 import { Log, NetworkLog } from '../log';
-import { EventEmitter, Randomizer } from '../../commons';
+import { EventEmitter, RepeatableRandomizer } from '../../commons';
 import { GameStateLog, GameStateMachine } from '../../model';
 import { BaseNetCode, INetCode, NetCodeFactory } from '../../netcode';
 import { PlanckGameStateMachine, SimpleGameStateMachine } from '../gamestate-machine';
@@ -86,7 +86,7 @@ export class Device {
         // gameStateMachine
         this.gameStateMachine = (
             config.usePlanck ?
-            new PlanckGameStateMachine(this._log, config.tickMs / 1000, config.width, config.height, config.npcs, new Randomizer(config.randomSeed)) :
+            new PlanckGameStateMachine(this._log, config.tickMs / 1000, config.width, config.height, config.npcs, new RepeatableRandomizer(config.randomSeed)) :
             new SimpleGameStateMachine()
         );
         // initialize netcode
@@ -102,6 +102,14 @@ export class Device {
         else
             return;
         this.netcode.tickMs = config.tickMs;
+        this.netcode.gamestateLogEmitter.addEventListener((gamestateLog) => {
+            const index = this._gameStateHistory.findIndex((gsLog) => gsLog.tick === gamestateLog.tick);
+            if (index == -1) {
+                this._gameStateHistory.unshift(gamestateLog);
+            } else {
+                this._gameStateHistory[index] = gamestateLog;
+            }
+        });
         // build initial game state
         const initialGameState = this.gameStateMachine.buildInitialGameState();
         // start netcode
@@ -113,6 +121,7 @@ export class Device {
 
     public stop() {
         this.running = false;
+        if (this.netcode) this.netcode.gamestateLogEmitter.removeListeners();
         this._networkInterface.trafficLog.flush();
         this._networkInterface.trafficLog.removeListeners();
         this._networkInterface.closeConnections();
@@ -132,20 +141,16 @@ export class Device {
             return;
         }
         window.requestAnimationFrame(() => { this.gameLoop(); });
-        this.update();
-        this.draw();
-    }
-
-    protected update() {
         try {
-            let gamestateLog = this.netcode.tick();
-            if (gamestateLog != null) {
-                this._gameStateHistory.unshift(gamestateLog);
-            }
+            this.update();
+            this.draw();
         } catch(error) {
             this._log.logError(error as string);
         }
-        
+    }
+
+    protected update() {
+        this.netcode.tick();
         this._deviceUpdatedEmitter.notify();
     }
 

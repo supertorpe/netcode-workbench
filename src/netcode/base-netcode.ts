@@ -1,6 +1,7 @@
-import { Command, CommandMessage, GameState, GameStateMachine, GameStateMessage, Message } from '../model';
+import { Command, CommandMessage, GameState, GameStateLog, GameStateMachine, GameStateMessage, Message } from '../model';
 import { Log, NetworkInterface } from '../systems';
 import { currentTimestamp } from '../commons/utils';
+import { EventEmitter } from '../commons';
 
 export interface INetCode {
     new (log: Log, net: NetworkInterface, gameStateMachine: GameStateMachine) : BaseNetCode;
@@ -14,7 +15,7 @@ export interface INetCode {
     remoteCommandReceived(command: Command): void;
     gameStateReceived(gameState: GameState): void;
     getGameStateToRender(): GameState;
-    getGameState(tick: number): GameState | null;
+    getGameState(tick: number): GameState | undefined;
 }
 
 export abstract class BaseNetCode {
@@ -23,6 +24,7 @@ export abstract class BaseNetCode {
     protected _startTime: number;
     protected _tickMs: number;
     protected _currentTick: number;
+    protected _gamestateLogEmitter: EventEmitter<GameStateLog> = new EventEmitter<GameStateLog>();
 
     constructor(protected log: Log, protected net: NetworkInterface, protected gameStateMachine: GameStateMachine) {
         this._startTime = 0;
@@ -41,6 +43,7 @@ export abstract class BaseNetCode {
     get tickMs(): number { return this._tickMs; }
     set tickMs(value: number) { this._tickMs = value; }
     get currentTick(): number { return this._currentTick; }
+    get gamestateLogEmitter(): EventEmitter<GameStateLog> { return this._gamestateLogEmitter; }
 
     public start(gameState?: GameState): number {
         this._startTime = currentTimestamp();
@@ -61,7 +64,7 @@ export abstract class BaseNetCode {
     public abstract remoteCommandReceived(command: Command): void;
     public abstract gameStateReceived(gameState: GameState): void;
     public abstract getGameStateToRender(): GameState;
-    public abstract getGameState(tick: number): GameState | null;
+    public abstract getGameState(tick: number): GameState | undefined;
     public abstract tick(): void;
 
 }

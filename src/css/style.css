@@ -19,6 +19,9 @@ canvas {
   font-size: 0.9em;
   white-space:nowrap;
 }
+.gameStateError {
+	border: 1px solid red;
+}
 .logs {
   font-family: 'Courier New', monospace;
   font-size: 0.8em;

@@ -11,7 +11,7 @@ class InterpolationInfo {
         public currentGameState: PlanckGameState,
         public currentGameStateTime: number,
         public elapsed: number,
-        public nextGameState: PlanckGameState | null,
+        public nextGameState: PlanckGameState | undefined,
         public nextGameStateTime: number | undefined,
         public nextElapsed: number,
         public tickTimeDiff: number
@@ -35,7 +35,7 @@ export class PlanckRenderer extends Renderer {
     private renderAsIs() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         const gameState = this.netcode.getGameStateToRender() as PlanckGameState;
-        for (let body = gameState.world.getBodyList(); body; body = body.getNext()) {
+        for (let body = gameState.world?.getBodyList(); body; body = body.getNext()) {
             if (!body.getUserData()) continue;
             if (body.isStatic()) {
                 this.drawStaticBody(body);
@@ -50,7 +50,7 @@ export class PlanckRenderer extends Renderer {
         let currentTime = currentTimestamp();
         const gameState = this.netcode.getGameStateToRender() as PlanckGameState;
         const gameStateTime = this.netcode.tickTime(gameState.tick);
-        const nextGameState = this.netcode.getGameState(gameState.tick + 1) as (PlanckGameState | null);
+        const nextGameState = this.netcode.getGameState(gameState.tick + 1) as (PlanckGameState | undefined);
         const nextGameStateTime = nextGameState ? this.netcode.tickTime(nextGameState.tick) : undefined;
 
         if (nextGameStateTime) {
@@ -73,7 +73,7 @@ export class PlanckRenderer extends Renderer {
             nextGameStateTime ? (nextGameStateTime - gameStateTime) / 1000 : this.netcode.tickMs / 1000
         );
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        for (let body = gameState.world.getBodyList(); body; body = body.getNext()) {
+        for (let body = gameState.world?.getBodyList(); body; body = body.getNext()) {
             if (!body.getUserData()) continue;
             if (body.isStatic()) {
                 this.drawStaticBody(body);

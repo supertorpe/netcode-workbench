@@ -6,11 +6,12 @@ import { SimpleBodyState, SimpleGameState } from './simple-game-state';
 
 export class PlanckGameState extends GameState {
     constructor(public tick: number, public commands: Command[],
-        public world: planck.World,
+        public world: planck.World | null,
         public bodies: planck.Body[],
         public scores: number[],
-        public playerWhoCollectedTheCoin: number | undefined) {
-        super(tick, commands);
+        public playerWhoCollectedTheCoin: number | undefined,
+        public randomPointer: number) {
+        super(tick, commands, randomPointer);
     }
 }
 
