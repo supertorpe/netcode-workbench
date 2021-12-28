@@ -32,6 +32,7 @@ export class PlanckRenderer extends Renderer {
     }
 
     public render(smoothing: String): void {
+        if (smoothing !== 'progressive') this.renderedPositions.clear();
         if (smoothing !== 'none') this.renderWithInterpolation(smoothing === 'progressive' ? CONSTS.PROGRESSIVE_RENDER_MAX_DISPLACEMENT : 0);
         else this.renderAsIs();
     }
