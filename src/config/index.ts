@@ -6,6 +6,9 @@ export class CanvasConfig {
 export class SerializerConfig {
     constructor(public name: string) { }
 }
+export class SmoothingConfig {
+    constructor(public name: string) { }
+}
 export class NetcodeConfig {
     constructor(public name: string, public type: string) { }
 }
@@ -36,6 +39,7 @@ export class Config {
     constructor(
         public canvas: CanvasConfig,
         public serializers: SerializerConfig[],
+        public smoothing: SmoothingConfig[],
         public netcodes: NetcodeConfig[],
         public network: NetworkConfig,
         public players: PlayerConfig[],

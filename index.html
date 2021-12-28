@@ -68,8 +68,12 @@
                 </tr>
                 <tr>
                     <td data-label="Property">Smoothing</td>
-                    <td data-label="Value"><input id="cbInterpolation" type="checkbox" data-ng-model="info.interpolation"
-                        data-ng-change="changeInterpolation()" /></td>
+                    <td data-label="Value">
+                        <select id="selSmoothing" class="input-small" data-ng-model="info.smoothing"
+                            data-ng-options="item as item.name for item in info.smoothings"
+                            data-ng-change="changeSmoothing()">
+                        </select>
+                    </td>
                 </tr>
                 <tr>
                     <td data-label="Property">Debug boxes</td>

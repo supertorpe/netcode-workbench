@@ -24,6 +24,17 @@
                 "name": "msgpackr"
             }
         ],
+        "smoothing": [
+            {
+                "name": "none"
+            },
+            {
+                "name": "x-polation"
+            },
+            {
+                "name": "progressive"
+            }
+        ],
         "netcodes": [
             {
                 "name": "p2p-naive",

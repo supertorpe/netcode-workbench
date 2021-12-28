@@ -27,9 +27,9 @@ export class P2PRollbackNetCode extends BaseNetCode {
   }
 
   public tick(): void {
-    // check if a new gamestate needs to be created
-    let latestGameState = this.gameStateHistory[this.gameStateHistory.length - 1] as PlanckGameState;
-    if (this.tickBasedOnTime() > latestGameState.tick) {
+    // while a new gamestate needs to be created
+    while (this.tickBasedOnTime() > this.gameStateHistory[this.gameStateHistory.length - 1].tick) {
+      let latestGameState = this.gameStateHistory[this.gameStateHistory.length - 1] as PlanckGameState;
       this._currentTick = latestGameState.tick + 1;
       this.log.logInfo(`Starting tick ${this._currentTick}`);
       // dump local command into the current game state
@@ -58,12 +58,8 @@ export class P2PRollbackNetCode extends BaseNetCode {
         const newGameState = this.computeNextGameState(latestGameState);
         this.gameStateHistory.push(newGameState);
       }
-      if (this.tickBasedOnTime() > this.gameStateHistory[this.gameStateHistory.length - 1].tick) {
-        // fast-forward
-        this.tick();
-      }
-      this.cleanup();
     }
+    this.cleanup();
   }
 
   private cleanup() {

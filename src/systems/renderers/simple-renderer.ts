@@ -1,7 +1,7 @@
-import { config } from "../../config";
+import { config, CONSTS } from "../../config";
 import { SimpleBodyState, SimpleGameState, SimpleGameStateUtils } from "../../model";
 import { BaseNetCode } from "../../netcode";
-import { currentTimestamp } from "../../commons";
+import { currentTimestamp, Vector } from "../../commons";
 import { Log } from "../log";
 import { Renderer } from "./renderer";
 
@@ -14,21 +14,25 @@ class SimpleInterpolationInfo {
         public nextGameState: SimpleGameState | undefined,
         public nextGameStateTime: number | undefined,
         public nextElapsed: number,
-        public tickTimeDiff: number
+        public tickTimeDiff: number,
+        public maxDisplacement: number
     ) { }
 }
 
 export class SimpleRenderer extends Renderer {
+
+    private renderedPositions: Map<number, Vector>;
 
     constructor(
         protected log: Log,
         protected canvas: HTMLCanvasElement,
         protected netcode: BaseNetCode) {
         super(log, canvas, netcode);
+        this.renderedPositions = new Map<number, Vector>();
     }
 
-    public render(interpolation: boolean): void {
-        if (interpolation) this.renderWithInterpolation();
+    public render(smoothing: String): void {
+        if (smoothing !== 'none') this.renderWithInterpolation(smoothing === 'progressive' ? CONSTS.PROGRESSIVE_RENDER_MAX_DISPLACEMENT : 0);
         else this.renderAsIs();
     }
 
@@ -45,7 +49,7 @@ export class SimpleRenderer extends Renderer {
         this.renderScores(gameState);
     }
 
-    private renderWithInterpolation() {
+    private renderWithInterpolation(maxDisplacement: number) {
         let currentTime = currentTimestamp();
         const gameState = this.netcode.getGameStateToRender() as SimpleGameState;
         if (!gameState) return;
@@ -70,7 +74,8 @@ export class SimpleRenderer extends Renderer {
             nextGameState,
             nextGameState ? this.netcode.tickTime(nextGameState.tick) : undefined,
             nextGameStateTime ? (currentTime - nextGameStateTime) / 1000 : 0,
-            nextGameStateTime ? (nextGameStateTime - gameStateTime) / 1000 : this.netcode.tickMs / 1000
+            nextGameStateTime ? (nextGameStateTime - gameStateTime) / 1000 : this.netcode.tickMs / 1000,
+            maxDisplacement
         );
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         gameState.bodies.forEach((body) => {
@@ -164,7 +169,24 @@ export class SimpleRenderer extends Renderer {
         // interpolation
         posX = x * config.physics.worldScale - body.width / 2;
         posY = y * config.physics.worldScale - body.height / 2;
-        //this.log.logInfo(`P${player.id} Interpolation x=${posX} y=${posY}`);
+        // gently bring the object closer to their desired position
+        if (interpolationInfo.maxDisplacement > 0) {
+            let latestRenderedPosition = this.renderedPositions.get(body.id);
+            if (latestRenderedPosition) {
+                let displacement = posX - latestRenderedPosition.x;
+                if (Math.abs(displacement) > interpolationInfo.maxDisplacement) {
+                    posX = latestRenderedPosition.x + interpolationInfo.maxDisplacement * Math.sign(displacement);
+                    latestRenderedPosition.x = posX;
+                }
+                displacement = posY - latestRenderedPosition.y;
+                if (Math.abs(displacement) > interpolationInfo.maxDisplacement) {
+                    posY = latestRenderedPosition.y + interpolationInfo.maxDisplacement * Math.sign(displacement);
+                    latestRenderedPosition.y = posY
+                }
+            } else {
+                this.renderedPositions.set(body.id, new Vector(posX, posY));
+            }
+        }        //this.log.logInfo(`P${player.id} Interpolation x=${posX} y=${posY}`);
         //*
         this.context.fillStyle = body.color;
         this.context.fillRect(posX, posY, body.width, body.height);

@@ -18,5 +18,5 @@ export abstract class Renderer {
     get debugBoxes(): boolean { return this._debugBoxes; }
     set debugBoxes(value: boolean) { this._debugBoxes = value; }
 
-    public abstract render(interpolation: boolean): void;
+    public abstract render(smoothing: String): void;
 }

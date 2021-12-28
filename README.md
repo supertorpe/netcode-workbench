@@ -7,7 +7,7 @@
 - Network abstraction with latency and packet loss simulation
 - Several serialization mechanisms: JSON, CBOR, MessagePack
 - Configurable tick duration
-- Parametrizable smoothing (interpolation/extrapolation)
+- Parametrizable smoothing (none, interpolation/extrapolation, progressive)
 - Optionally draw debug boxes to see smoothing effect
 - Realtime and downloadable logs and game state history
 - Network Traffic Chart

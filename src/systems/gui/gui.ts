@@ -298,7 +298,8 @@ class Gui {
                     npcs: 0,
                     realtimeGameStates: true,
                     realtimeLogs: false,
-                    interpolation: true,
+                    smoothings: config.smoothing,
+                    smoothing: config.smoothing[1],
                     debugBoxes: true,
                     syncScrollGs1: true,
                     syncScrollGs2: true,
@@ -788,7 +789,7 @@ class Gui {
                                 device.connect(otherDevice, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                             }
                         }
-                        const devicePlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, $scope.info.interpolation, $scope.info.debugBoxes);
+                        const devicePlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, $scope.info.smoothing.name, $scope.info.debugBoxes);
                         this.devicePlayer1.play(devicePlayConfig);
                         this.devicePlayer2.play(devicePlayConfig);
                         $scope.info.deviceNPCs.forEach((device: NPCDevice) => { device.play(devicePlayConfig); });
@@ -802,8 +803,8 @@ class Gui {
                         $scope.info.deviceNPCs.forEach((device: NPCDevice) => {
                             device.connect(this.deviceServer, $scope.info.serializer.name, $scope.info.latency1.min, $scope.info.latency1.max, $scope.info.packetLoss1, $scope.info.latency2.min, $scope.info.latency2.max, $scope.info.packetLoss2);
                         });
-                        const serverPlayConfig = new HeadedDevicePlayConfig(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, false, false);
-                        const clientPlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, false, randomSeed, $scope.info.interpolation, $scope.info.debugBoxes);
+                        const serverPlayConfig = new HeadedDevicePlayConfig(algorithm, ServerNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, true, randomSeed, 'none', false);
+                        const clientPlayConfig = new HeadedDevicePlayConfig(algorithm, ClientNetCodeClass, $scope.info.tick, $scope.info.npcs, config.canvas.width, config.canvas.height, false, randomSeed, $scope.info.smoothing.name, $scope.info.debugBoxes);
                         this.deviceServer.play(serverPlayConfig);
                         this.devicePlayer1.play(clientPlayConfig);
                         this.devicePlayer2.play(clientPlayConfig);
@@ -870,9 +871,9 @@ class Gui {
                     });
                 };
 
-                $scope.changeInterpolation = () => {
-                    this.devicePlayer1.interpolation = $scope.info.interpolation;
-                    this.devicePlayer2.interpolation = $scope.info.interpolation;
+                $scope.changeSmoothing = () => {
+                    this.devicePlayer1.smoothing = $scope.info.smoothing.name;
+                    this.devicePlayer2.smoothing = $scope.info.smoothing.name;
                 };
                 $scope.changeDebugBoxes = () => {
                     this.devicePlayer1.debugBoxes = $scope.info.debugBoxes;
